@@ -152,7 +152,7 @@ export default function LeagueTable() {
                         </TableHeader>
                         <TableBody>
                             {leagueTable.records.map((record, index) => (
-                                <TableRow>
+                                <TableRow key={index + 1}>
                                     <TableCell className="font-medium pl-4 text-[12px]">{index + 1}</TableCell>
                                     <TableCell className="font-medium text-[12px] p-1 flex">
                                         <Image src={realmadrid} width={20} height={12} alt="" className="mr-1" />
@@ -191,7 +191,7 @@ export default function LeagueTable() {
                         </TableHeader>
                         <TableBody>
                             {leagueTable.records.map((record, index) => (
-                                <TableRow>
+                                <TableRow key={index + 1}>
                                     <TableCell className="font-medium pl-4 text-[12px]">{index + 1}</TableCell>
                                     <TableCell className="font-medium text-[12px] p-1 flex">
                                         <Image src={realmadrid} width={20} height={12} alt="" className="mr-1" />
