@@ -4,19 +4,13 @@ import logo1 from '../assets/images/demosport.png'
 import logo2 from '../assets/images/logo2.png'
 import logolight from '../assets/images/logolight.png'
 import Link from "next/link";
-import { ChevronRight, MenuIcon, ShoppingCart } from "lucide-react";
+import { MenuIcon, ShoppingCart } from "lucide-react";
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from "@/components/ui/accordion"
-import { ChevronRightIcon, XMarkIcon } from "@heroicons/react/16/solid";
+import { XMarkIcon } from "@heroicons/react/16/solid";
 import { cn } from "@/lib/utils";
 import { UserButton } from "@clerk/nextjs";
 
