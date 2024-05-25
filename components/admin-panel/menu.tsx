@@ -14,6 +14,7 @@ import {
   TooltipProvider
 } from "@/components/ui/tooltip";
 import { getMenuList } from "@/lib/menu-list";
+import { SignOutButton } from "@clerk/nextjs";
 
 interface MenuProps {
   isOpen: boolean | undefined;
@@ -78,21 +79,20 @@ export function Menu({ isOpen }: MenuProps) {
               <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
                   <Button
-                    onClick={() => { }}
+                    onClick={() => {
+                      // call the onClick method of the child component
+                      const signOutButton = document.querySelector<HTMLButtonElement>('button[data-testid="sign-out-button"]');
+                      if (signOutButton) {
+                        signOutButton.click();
+                      }
+                    }}
                     variant="outline"
-                    className="w-full justify-center h-10 mt-5"
+                    className="w-full justify-center h-10 mt-5 hover:bg-[#344054] hover:text-white hover:border-0"
                   >
                     <span className={cn(isOpen === false ? "" : "mr-4")}>
                       <LogOut size={18} />
                     </span>
-                    <p
-                      className={cn(
-                        "whitespace-nowrap",
-                        isOpen === false ? "opacity-0 hidden" : "opacity-100"
-                      )}
-                    >
-                      Sign out
-                    </p>
+                    <SignOutButton data-testid="sign-out-button" />
                   </Button>
                 </TooltipTrigger>
                 {isOpen === false && (
