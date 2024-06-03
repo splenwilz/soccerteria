@@ -11,6 +11,9 @@ export const createUser = async (userdata: User) => {
             first_name: UserSchema.firstName,
             last_name: UserSchema.lastName,
             email: UserSchema.email,
+        }).onConflictDoUpdate({
+            target: [UserSchema.email],
+            set: userdata
         })
 
     console.log(userresult[0])

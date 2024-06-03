@@ -20,6 +20,7 @@ import profileicon from "../../../assets/images/profileicon.svg";
 import { ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { db } from "@/utils/dbConfig";
 
 interface Order {
     id: string
@@ -28,7 +29,7 @@ interface Order {
     total: number
 }
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
 
     const demoOrders: Order[] = [
         {
@@ -57,6 +58,19 @@ export default function DashboardPage() {
         }
 
     ]
+
+    async function fetchUserWallets() {
+        const users = await db.query.UserSchema.findMany({
+            columns: {
+                email: true
+            },
+            with: { wallet: true }
+        })
+
+        console.log(users)
+    }
+
+    fetchUserWallets()
     return (
         <ContentLayout title="Dashboard">
             <Tabs defaultValue="overview" className="space-y-4">
