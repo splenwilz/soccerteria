@@ -17,12 +17,15 @@ export const createAddFundsSession = async () => {
 
 
     const stripeSession = await stripe.checkout.sessions.create({
-        success_url: `${'http://localhost:3000/thank-you?orderId='}${product.id}`,
-        cancel_url: "http://localhost:3000/cart",
+        // success_url: `${'http://localhost:3000/thank-you?orderId='}${product.id}`,
+        // cancel_url: "http://localhost:3000/cart",
+        success_url: `${process.env.NEXT_PUBLIC_DOMAIN}'/thank-you?orderId='${product.id}`,
+        cancel_url: `${process.env.NEXT_PUBLIC_DOMAIN}/cart`,
         payment_method_types: ["card"],
         mode: "payment",
         metadata: {
-            userId: "1"
+            userId: "1",
+            orderId: product.id
         },
         line_items: [
             {
