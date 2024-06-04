@@ -2,13 +2,13 @@
 export type Role<T> = T extends "user" | "admin" ? T : never;
 
 export interface User {
-    createdAt?: number | undefined;
-    address: string;
+    userId: string;
+    email: string;
+    firstName?: string | undefined;
+    lastName?: string | undefined;
     role: Role<"user" | "admin">; // Provide the type argument here
     gender?: string | undefined;
+    address: string;
     imageUrl?: string | undefined;
-    lastName?: string | undefined;
-    firstName?: string | undefined;
-    clerkUserId: string;
-    email: string;
+    createdAt?: number | undefined;
 }

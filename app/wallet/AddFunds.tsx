@@ -22,23 +22,25 @@ import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/ui/use-toast'
 
 const fundsSchema = z.object({
-    amount: z.string().min(1, { message: "Amount must be greater than 0" }),
-    name_on_card: z.string().min(1, { message: "Name on card is required" }),
-    card_number: z.string().min(1, { message: "Card number is required" }),
-    cvc: z.string().min(1, { message: "CVC is required" }),
-    expiry_date_month: z.string().min(1, { message: "Expiry date is required" }),
-    expiry_date_year: z.string().min(1, { message: "Expiry date is required" }),
+    amount: z.coerce.number(),
+    // amount: z.number().min(1, { message: "Amount must be greater than 0" }),
+    // name_on_card: z.string().min(1, { message: "Name on card is required" }),
+    // card_number: z.string().min(1, { message: "Card number is required" }),
+    // cvc: z.string().min(1, { message: "CVC is required" }),
+    // expiry_date_month: z.string().min(1, { message: "Expiry date is required" }),
+    // expiry_date_year: z.string().min(1, { message: "Expiry date is required" }),
 })
 export default function AddFunds() {
     const form = useForm<z.infer<typeof fundsSchema>>({
         resolver: zodResolver(fundsSchema),
         defaultValues: {
-            amount: "",
-            name_on_card: "",
-            card_number: "",
-            cvc: "",
-            expiry_date_month: "",
-            expiry_date_year: "",
+            amount: 0,
+
+            // name_on_card: "",
+            // card_number: "",
+            // cvc: "",
+            // expiry_date_month: "",
+            // expiry_date_year: "",
         },
     })
 
@@ -50,7 +52,7 @@ export default function AddFunds() {
         // Do something with the form values.
         // ✅ This will be type-safe and validated.
         console.log(values)
-        addFunds()
+        addFunds({ price: values.amount * 100 })
     }
 
     const { mutate: addFunds } = useMutation(
@@ -86,16 +88,16 @@ export default function AddFunds() {
                             name="amount"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Add Funds</FormLabel>
+                                    <FormLabel>Add Funds ($)</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Add Funds" {...field} />
+                                        <Input placeholder="0" type="number" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
                     </div>
-                    <FormField
+                    {/* <FormField
                         control={form.control}
                         name="name_on_card"
                         render={({ field }) => (
@@ -163,7 +165,7 @@ export default function AddFunds() {
                                 </FormItem>
                             )}
                         />
-                    </div>
+                    </div> */}
                     <div className="flex justify-center mt-12 pt-12">
                         <Button variant={"primary"} type="submit" className='px-24'>Add Funds</Button>
                     </div>

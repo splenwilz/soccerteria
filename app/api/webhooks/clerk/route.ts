@@ -62,7 +62,7 @@ export async function POST(req: Request) {
         }
 
         const user = {
-            clerkUserId: id,
+            userId: id,
             email: email_addresses[0].email_address,
             ...(first_name ? { firstName: first_name } : {}),
             ...(last_name ? { lastName: last_name } : {}),

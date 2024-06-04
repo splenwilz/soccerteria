@@ -2,10 +2,12 @@
 
 import { stripe } from "@/lib/stripe"
 import { db } from "@/utils/dbConfig"
+import { OrdersSchema } from "@/utils/schema"
+import { currentUser } from "@clerk/nextjs/server"
 
-export const createAddFundsSession = async () => {
-    let price = 500
-
+export const createAddFundsSession = async ({ price }: { price: number }) => {
+    // let price = 400
+    const user = await currentUser();
     const product = await stripe.products.create({
         name: "Fund Wallet",
         images: ["https://i.imgur.com/liMHcb8.jpeg"],
@@ -15,17 +17,30 @@ export const createAddFundsSession = async () => {
         }
     })
 
+    // Add order to your database
+    const order = await db
+        .insert(OrdersSchema)
+        .values({
+            userId: user!.id as string,
+            status: "pending",
+            total: price.toString(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        })
+        .returning({
+            id: OrdersSchema.id,
+            total: OrdersSchema.total,
+        })
+
 
     const stripeSession = await stripe.checkout.sessions.create({
-        // success_url: `${'http://localhost:3000/thank-you?orderId='}${product.id}`,
-        // cancel_url: "http://localhost:3000/cart",
-        success_url: `${process.env.NEXT_PUBLIC_DOMAIN}'/thank-you?orderId='${product.id}`,
+        success_url: `${process.env.NEXT_PUBLIC_DOMAIN}/thank-you?orderId=${order[0].id}`,
         cancel_url: `${process.env.NEXT_PUBLIC_DOMAIN}/cart`,
         payment_method_types: ["card"],
         mode: "payment",
         metadata: {
-            userId: "1",
-            orderId: product.id
+            userId: user!.id,
+            orderId: order[0].id
         },
         line_items: [
             {
