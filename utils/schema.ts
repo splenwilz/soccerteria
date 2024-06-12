@@ -20,7 +20,7 @@ export const UserSchema = pgTable("users", {
 export const OrdersSchema = pgTable("orders", {
   id: serial("id").primaryKey(),
   userId: text("userId").references(() => UserSchema.userId, { onDelete: 'cascade' }),
-  status: text("status"),
+  status: text("status").$type<"pending" | "complete" | "cancel" | "default" | "secondary" | "destructive" | "outline">(),
   total: text("total"),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").defaultNow(),
@@ -30,7 +30,7 @@ export const OrdersSchema = pgTable("orders", {
 // User Wallet
 export const WalletSchema = pgTable("wallets", {
   id: serial("id").primaryKey(),
-  userId: text("userId").references(() => UserSchema.userId),
+  userId: text("userId").references(() => UserSchema.userId, { onDelete: 'cascade' }),
   balance: text('balance'),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").defaultNow(),

@@ -34,7 +34,7 @@ export function Footer() {
           </Link>
         </div>
         <p className="text-[12px] leading-loose text-muted-foreground text-left">
-          Lorem Ipsum is simply dummy text of the printing
+          Made with love by the Soccerteria team. All rights reserved.
         </p>
 
       </div>

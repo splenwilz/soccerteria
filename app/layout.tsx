@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Manrope, Montserrat } from "next/font/google";
+import { Inter, Manrope, Montserrat, Roboto } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ReactQueryClientProvider } from "@/components/ReactQueryClientProvider";
@@ -15,6 +15,13 @@ const montserrat = Montserrat({
   variable: '--font-montserrat',
   display: 'auto',
   preload: false,
+})
+
+const roboto = Roboto({
+  variable: '--font-roboto',
+  display: 'auto',
+  preload: false,
+  weight: ['300', '400', '500', '700'],
 })
 
 export const metadata: Metadata = {

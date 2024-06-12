@@ -39,8 +39,8 @@ export async function POST(req: Request) {
             });
 
             if (user) {
-
-                const amountSubtotal = session.amount_subtotal || 0;
+                console.log(`updating user balance ${user.balance}`)
+                const amountSubtotal = (session.amount_subtotal || 0) / 100;
                 const newBalance = (parseInt(user.balance || "0") + amountSubtotal).toString();
                 await db.update(WalletSchema).set({
                     balance: newBalance,
@@ -48,6 +48,7 @@ export async function POST(req: Request) {
                 }).where(eq(WalletSchema.userId, userId));
 
             } else {
+                console.log(`creating user balance ${session.amount_subtotal?.toString() || "0"}`)
                 await db.insert(WalletSchema).values({
                     userId: userId,
                     balance: session.amount_subtotal?.toString() || "0",

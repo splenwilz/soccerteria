@@ -36,7 +36,7 @@ interface UpcomingDemo {
     status: "pending" | "complete" | "cancel"
 }
 
-export default function DrawsPage() {
+export default function OrdersPage() {
     const upcomingDemo: UpcomingDemo[] = [
         {
             id: "XPL 80668 DB",
@@ -98,8 +98,8 @@ export default function DrawsPage() {
             <Tabs defaultValue="overview" className="space-y-4">
                 <TabsContent value="overview" className="space-y-4">
                     <div className="mb-8">
-                        <h1 className="text-2xl my-2">Draws</h1>
-                        <p className="text-muted-foreground text-[14px]">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
+                        <h1 className="text-2xl my-2">Orders</h1>
+                        <p className="text-muted-foreground text-[14px]">View your latest order right here!</p>
                     </div>
 
                     <Card>

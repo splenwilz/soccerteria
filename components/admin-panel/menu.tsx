@@ -78,22 +78,24 @@ export function Menu({ isOpen }: MenuProps) {
             <TooltipProvider disableHoverableContent>
               <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
-                  <Button
-                    onClick={() => {
-                      // call the onClick method of the child component
-                      const signOutButton = document.querySelector<HTMLButtonElement>('button[data-testid="sign-out-button"]');
-                      if (signOutButton) {
-                        signOutButton.click();
-                      }
-                    }}
-                    variant="outline"
-                    className="w-full justify-center h-10 mt-5 hover:bg-[#344054] hover:text-white hover:border-0"
-                  >
-                    <span className={cn(isOpen === false ? "" : "mr-4")}>
-                      <LogOut size={18} />
-                    </span>
-                    <SignOutButton data-testid="sign-out-button" />
-                  </Button>
+                  <>
+                    <div
+                      onClick={() => {
+                        // call the onClick method of the child component
+                        const signOutButton = document.querySelector<HTMLButtonElement>('button[data-testid="sign-out-button"]');
+                        if (signOutButton) {
+                          signOutButton.click();
+                        }
+                      }}
+                      // variant="outline"
+                      className="flex bg-white rounded-md w-full justify-center h-10 mt-5 hover:bg-[#344054] hover:text-white hover:border-0"
+                    >
+                      <span className={cn(isOpen === false ? "mt-2" : "mr-4 mt-2")}>
+                        <LogOut size={18} />
+                      </span>
+                      <SignOutButton data-testid="sign-out-button" />
+                    </div>
+                  </>
                 </TooltipTrigger>
                 {isOpen === false && (
                   <TooltipContent side="right">Sign out</TooltipContent>

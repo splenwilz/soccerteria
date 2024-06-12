@@ -38,9 +38,9 @@ export function getMenuList(pathname: string): Group[] {
       groupLabel: "",
       menus: [
         {
-          href: "/home",
+          href: "/dashboard",
           label: "Home",
-          active: pathname.includes("/dashboard"),
+          active: pathname.split("/").pop() === "dashboard",
           icon: LayoutGrid,
           submenus: []
         }
@@ -57,16 +57,16 @@ export function getMenuList(pathname: string): Group[] {
           submenus: []
         },
         {
-          href: "/orders",
+          href: "orders",
           label: "Orders",
           active: pathname.includes("/orders"),
           icon: Notebook,
           submenus: []
         },
         {
-          href: "/wallets",
+          href: "/dashboard/wallet",
           label: "Wallets",
-          active: pathname.includes("/wallets"),
+          active: pathname.includes("/wallet"),
           icon: Wallet,
           submenus: []
         },
@@ -78,7 +78,7 @@ export function getMenuList(pathname: string): Group[] {
           submenus: []
         },
         {
-          href: "/profile",
+          href: "profile",
           label: "Profile",
           active: pathname.includes("/profile"),
           icon: SquareUser,

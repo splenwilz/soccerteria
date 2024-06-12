@@ -8,9 +8,10 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { BoltIcon, XMarkIcon } from "@heroicons/react/16/solid"
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-interface SelectedOptions {
+export interface SelectedOptions {
     [key: string]: string[];
 }
 export default function Prediction() {
@@ -129,6 +130,7 @@ export default function Prediction() {
 
         '14-0': 12288.00,
     };
+    const router = useRouter();
 
 
     const [selectedOptions, setSelectedOptions] = useState<SelectedOptions>({});
@@ -136,26 +138,35 @@ export default function Prediction() {
     const [doublesCount, setDoublesCount] = useState(0);
     const [triplesCount, setTriplesCount] = useState(0);
     const [selectedGamesCount, setSelectedGamesCount] = useState(0);
-
+    let selectedTeams = Object.keys(selectedOptions).length
 
     const handleOptionSelect = (teamId: string, option: string) => {
         setSelectedOptions((prevOptions) => {
             const teamOptions = prevOptions[teamId] || [];
+
+            let updatedTeamOptions;
+
             if (teamOptions.includes(option)) {
                 // Remove the option if it is already selected
-                return {
-                    ...prevOptions,
-                    [teamId]: teamOptions.filter(opt => opt !== option),
-                };
+                updatedTeamOptions = teamOptions.filter(opt => opt !== option);
             } else {
                 // Add the option if it is not already selected
+                updatedTeamOptions = [...teamOptions, option];
+            }
+
+            // If there are no options left for the team, remove the team from the list
+            if (updatedTeamOptions.length === 0) {
+                const { [teamId]: _, ...restOptions } = prevOptions;
+                return restOptions;
+            } else {
                 return {
                     ...prevOptions,
-                    [teamId]: [...teamOptions, option],
+                    [teamId]: updatedTeamOptions,
                 };
             }
         });
     };
+
 
     useEffect(() => {
         const calculateTotalAmount = () => {
@@ -205,6 +216,9 @@ export default function Prediction() {
                 }
             }
 
+            // Find out if the user has selected all 15 games
+
+
 
             setTotalAmount(total);
             setDoublesCount(doubles);
@@ -214,6 +228,20 @@ export default function Prediction() {
 
         calculateTotalAmount();
     }, [selectedOptions]);
+
+    const handleGameSubmit = () => {
+        // Store the selected options, total amount, doubles count, and triples count in an object and store it in local storage
+        const predictionData = {
+            selectedOptions,
+            totalAmount,
+            doublesCount,
+            triplesCount,
+        };
+        localStorage.setItem('predictionData', JSON.stringify(predictionData));
+
+        // Redirect to the next page
+        router.push('/dashboard/summary');
+    };
 
     return (
         <div className="bg-[#F1F0FE] p-2 pl-3 pr-3 rounded-lg max-w-[700px] sm:max-w-[700px] md:max-w-[400px] xl:max-w-[700px]">
@@ -312,8 +340,9 @@ export default function Prediction() {
                         </div>
                     </div>
                     <button
-                        onClick={() => console.warn(totalAmount)}
-                        className="bg-[#2366BC] text-white font-inter font-semibold text-[16px] px-7 py-2 rounded-sm"
+                        onClick={handleGameSubmit}
+                        className="bg-[#2366BC] disabled:bg-[#2366BC]/50 disabled:cursor-not-allowed text-white font-inter font-semibold text-[16px] px-7 py-2 rounded-sm"
+                        disabled={selectedTeams < 16}
                     >
                         Play Now
                     </button>

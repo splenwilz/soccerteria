@@ -7,6 +7,7 @@ import TableResources from "@/components/TableResources";
 import Welcome from "@/components/Welcome";
 import YoutubeVideoContainer from "@/components/YoutubeVideoContainer";
 import Image from "next/image";
+import SuccessDialog from "./(user)/dashboard/wallet/SuccessDialog";
 
 export default function Home() {
   return (
@@ -15,6 +16,7 @@ export default function Home() {
       <div className="bg-[rgba(38,39,38)]">
         <Welcome />
       </div>
+
       <CountDownTime />
       <TableResources />
       <LeagueTable />

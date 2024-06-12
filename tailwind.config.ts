@@ -75,7 +75,8 @@ const config = {
       fontFamily: {
         inter: ['var(--font-inter)'],
         manrope: ['var(--font-manrope)'],
-        montserrat: ['var(--font-montserrat)']
+        montserrat: ['var(--font-montserrat)'],
+        roboto: ['var(--font-roboto)'],
       },
     },
   },
