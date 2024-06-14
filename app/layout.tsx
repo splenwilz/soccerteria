@@ -3,6 +3,7 @@ import { Inter, Manrope, Montserrat, Roboto } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ReactQueryClientProvider } from "@/components/ReactQueryClientProvider";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 const manrope = Manrope({
@@ -39,6 +40,7 @@ export default function RootLayout({
       <ClerkProvider>
         <html lang="en">
           <body className={`${inter.className} ${manrope.className} ${montserrat.className} `}>{children}</body>
+
         </html>
       </ClerkProvider>
     </ReactQueryClientProvider>

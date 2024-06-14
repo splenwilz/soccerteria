@@ -31,22 +31,35 @@ import { Eye } from "lucide-react";
 import AddFunds from "../wallet/AddFunds";
 import ProfileForm from "./Profile";
 import { currentUser } from "@clerk/nextjs/server";
-// import ProfileForm from "./Profile";
+import { getUser } from "@/lib/user";
 
-interface UpcomingDemo {
-    id: string
-    game: string
-    date: string
-    status: "pending" | "complete" | "cancel"
-}
+
+// export default async function ProfilePage() {
+//     const userId = await currentUser()
+//     const user = await getUser(userId?.id!)
+//     return (
+//         <ContentLayout title="">
+//             <Card>
+//                 <CardContent>
+//                     <ProfileForm user={user} />
+//                 </CardContent>
+//             </Card>
+//         </ContentLayout>
+//     )
+// }
 
 export default async function ProfilePage() {
-    const user = await currentUser()
+    const userId = await currentUser()
+    const user = await getUser(userId?.id!)
+    // if (!user || user.length === 0) {
+    //     return null // or render an error message
+    // }
+    const [profileUser] = user // extract the first user from the array
     return (
-        <ContentLayout title="">
+        <ContentLayout title="Profile">
             <Card>
                 <CardContent>
-                    <ProfileForm />
+                    <ProfileForm user={profileUser} />
                 </CardContent>
             </Card>
         </ContentLayout>

@@ -2,8 +2,7 @@
 import { relations } from "drizzle-orm";
 import { pgTable, serial, text, boolean, timestamp, foreignKey, date, integer, numeric, bigint } from "drizzle-orm/pg-core"; // replace with actual import
 
-
-// User table
+// Users
 export const UserSchema = pgTable("users", {
   id: serial("id").primaryKey(),
   userId: text("userId").notNull().unique(),
@@ -13,6 +12,15 @@ export const UserSchema = pgTable("users", {
   imageUrl: text("imageUrl"),
   gender: text("gender"),
   address: text("address"),
+  street: text("street"),
+  city: text("city"),
+  state: text("state"),
+  postcode: text("postcode"),
+  country: text("country"),
+  countryCode: text("countryCode"),
+  currency: text("currency"),
+  currencySymbol: text("currencySymbol"),
+  phone: text("phone"),
   role: text("role").notNull().$type<"admin" | "user">().default("user"),
 })
 

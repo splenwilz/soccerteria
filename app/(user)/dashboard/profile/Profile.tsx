@@ -1,8 +1,6 @@
 "use client"
-
-import Link from "next/link"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useFieldArray, useForm } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { z } from "zod"
 
 import { Button } from "@/components/ui/button"
@@ -10,7 +8,6 @@ import profilepics from "@/assets/images/profilepics.svg"
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -24,139 +21,140 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Separator } from "@/components/ui/separator"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import Image from "next/image"
-import { User } from "@clerk/nextjs/server"
-
-
-const profileFormSchema = z.object({
-    firstname: z
-        .string()
-        .min(2, {
-            message: "Firstname must be at least 2 characters.",
-        })
-        .max(30, {
-            message: "Firstname must not be longer than 30 characters.",
-        }),
-    lastname: z
-        .string()
-        .min(2, {
-            message: "Lastname must be at least 2 characters.",
-        })
-        .max(30, {
-            message: "Lastname must not be longer than 30 characters.",
-        }),
-    language: z
-        .string()
-        .refine((value) => value === "en", "Please select an option"),
-    email: z
-        .string({
-            required_error: "Please select an email to display.",
-        })
-        .email(),
-    gender: z.string().optional(),
-    street: z.string().min(1, { message: "Street name is required." }),
-    city: z.string().min(1, { message: "City name is required." }),
-    state: z.string().min(1, { message: "State name is required." }),
-    postcode: z
-        .string()
-        .min(1, { message: "Postcode is required." }),
-    country: z.string().min(1, { message: "Country name is required." }),
-    phone: z.string().min(1, { message: "Phone number is required." }),
-    bio: z.string().max(160).min(4),
-    urls: z
-        .array(
-            z.object({
-                value: z.string().url({ message: "Please enter a valid URL." }),
-            })
-        )
-        .optional(),
-})
+import React from "react"
+import { UploadButton } from "@/utils/uploadthing"
+import { imageRemove } from "@/app/actions/imageRemove"
+import { Toaster } from "@/components/ui/toaster"
+import { profileFormSchema } from "./default"
+import { User } from "@/lib/types"
+import { UpdateProfilePics, updateUser } from "@/lib/user"
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>
 
-// This can come from your database or API.
-const defaultValues: Partial<ProfileFormValues> = {
-    bio: "I own a computer.",
-    urls: [
-        { value: "https://shadcn.com" },
-        { value: "http://twitter.com/shadcn" },
-    ],
+interface ProfileFormProps {
+    user: User;
 }
 
-export default function ProfileForm() {
+export default function ProfileForm({ user }: ProfileFormProps) {
+    const defaultValues: Partial<ProfileFormValues> = {
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email,
+        gender: user.gender === "male" || user.gender === "female" ? user.gender : undefined,
+        street: user.street || "",
+        city: user.city || "",
+        state: user.state || "",
+        postcode: user.postcode || "",
+        country: user.country || "",
+        phone: user.phone || "",
+    }
     const form = useForm<ProfileFormValues>({
         resolver: zodResolver(profileFormSchema),
         defaultValues,
         mode: "onChange",
     })
 
-    const { fields, append } = useFieldArray({
-        name: "urls",
-        control: form.control,
-    })
+    const [preview, setPreview] = React.useState(user.imageUrl || profilepics);
+    const [imageKey, setImageKey] = React.useState('')
 
     function onSubmit(data: ProfileFormValues) {
+        const updatedData = {
+            ...data,
+            userId: user.userId,
+        };
+        updateUser(user.userId, updatedData);
         toast({
-            title: "You submitted the following values:",
-            description: (
-                <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-                    <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-                </pre>
-            ),
+            title: "Profile updated",
+            description: "Your profile has been updated.",
         })
+    }
+
+    const [uploading, setUploading] = React.useState(false)
+
+    const handleRemoveImage = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setUploading(true)
+        const res = await imageRemove(imageKey)
+        if (res.success) {
+            UpdateProfilePics(user.userId, '')
+            setPreview(profilepics)
+            setUploading(false)
+            toast({
+                title: "Image removed",
+                description: "This image has been removed from your profile.",
+            })
+        }
     }
 
     return (
         <Form {...form}>
-
+            <Toaster />
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 <div className="flex mt-6">
-                    {/* <Avatar>
-                        <AvatarImage src={user?.imageUrl} />
-                        <AvatarFallback>{user?.firstName?.[0] ?? ''}{user?.lastName?.[0] ?? ''}</AvatarFallback>
-                    </Avatar> */}
-                    <div className="">
-                        <Image src={profilepics} alt="signup_wing1" className="" width={60} height={60} />
-                    </div>
+                    <Avatar className="w-16 h-16 mr-1">
+                        <AvatarImage src={preview} />
+                        <AvatarFallback>{user.firstName ? user.firstName[0] : ""}{user.lastName ? user.lastName[0] : ""}</AvatarFallback>
+                    </Avatar>
+
                     <div className="ml-5">
-                        <h3 className="font-inter font-semibold  ">Profile Picture</h3>
-                        <div className="flex gap-5 mt-2 mb-2">
-                            <Button
-                                type="submit"
-                                variant="primary"
-                                size="sm"
-                                className="px-2 text-[12px]">Upload Image</Button>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className="px-4 text-[12px]"
+                        <h3 className="font-inter font-semibold mb-2 ">Profile Picture</h3>
+                        <div className="flex gap-3">
+                            <UploadButton
+                                className="h-[58px] text-[12px] ut-button:bg-[#2366BC]"
+                                endpoint="imageUploader"
+                                onClientUploadComplete={(res) => {
+                                    setPreview(res[0].url);
+                                    setImageKey(res[0].key)
+                                    toast({
+                                        title: "Image uploaded",
+                                        description: "This image has been uploaded to your profile.",
+                                    })
+                                    UpdateProfilePics(user.userId, res[0].url)
+                                }}
+                                onUploadError={(error: Error) => {
+                                    toast({
+                                        title: "Image upload failed",
+                                        description: error.message,
+                                    })
+                                }}
+                            />
+
+                            <button
+                                className={`border h-9 py-1 ${uploading ? 'opacity-50 cursor-not-allowed' : ''} rounded-sm border-[#2366BC] text-[#2366BC] bg-[#fff] px-8 text-[12px]`}
+                                onClick={handleRemoveImage}
                             >
-                                Remove
-                            </Button>
+                                <div className="flex gap-3">
+                                    <span className="">Remove</span>
+                                    {uploading && <span role="status">
+                                        <svg aria-hidden="true" className="w-4 h-4 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
+                                            <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
+                                        </svg>
+                                        <span className="sr-only">Loading...</span>
+                                    </span>}
+                                </div>
+                            </button>
                         </div>
-                        <span className="text-sm text-gray-500 mt-10">We support PNGs, JPGs and GIFs under 10MB</span>
                     </div>
                 </div>
                 <Separator />
+
                 <div className="mt-6">
-                    <h2 className="text-lg font-semibold text-gray-900 mt-3">Personal Information</h2>
-                    <p className="text-sm text-gray-500 mt-2 mb-10">
-                        Enter your personal information, including your first name, last name, and a brief bio.
-                    </p>
+                    <h2 className="text-lg font-semibold text-gray-900 mt-3 font-inter">Personal Information</h2>
+                    <p className="text-sm text-gray-500">Your personal information will be displayed on your profile</p>
                 </div>
+
                 <div className="flex gap-5">
                     <div className="w-1/2 mx-auto">
                         <FormField
                             control={form.control}
-                            name="firstname"
+                            name="firstName"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Firstname</FormLabel>
@@ -171,7 +169,7 @@ export default function ProfileForm() {
                     <div className="w-1/2 mx-auto">
                         <FormField
                             control={form.control}
-                            name="lastname"
+                            name="lastName"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Lastname</FormLabel>
@@ -184,11 +182,14 @@ export default function ProfileForm() {
                         />
                     </div>
                 </div>
+
+
                 <div className="flex gap-5">
                     <div className="w-1/2 mx-auto">
                         <FormField
                             control={form.control}
                             name="email"
+                            disabled
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Email</FormLabel>
@@ -225,41 +226,46 @@ export default function ProfileForm() {
                     </div>
                 </div>
 
-                <FormField
-                    control={form.control}
-                    name="gender"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>I am</FormLabel>
-                            <RadioGroup className="flex gap-10 -mt-10" defaultValue="male">
-                                <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="male" id="male" />
-                                    <div className="flex flex-col mt-5">
-                                        <Label htmlFor="male">Male</Label>
-                                        <span className="text-gray-400 mt-[2px] text-[12px]">(over 18 years old)</span>
-                                    </div>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="female" id="female" />
-                                    <div className="flex flex-col mt-5">
-                                        <Label htmlFor="female">Woman</Label>
-                                        <span className="text-gray-400 mt-[2px] text-[12px]">(over 18 years old)</span>
-                                    </div>
-                                </div>
-                            </RadioGroup>
+                <div className="grid gap-2">
+                    <FormField
+                        control={form.control}
+                        name="gender"
+                        render={({ field }) => (
+                            <FormItem className="[&>label]:text-base">
+                                <FormLabel>Gender</FormLabel>
+                                <RadioGroup
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                    className="flex flex-row space-x-4"
+                                >
 
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value="male" id="male" />
+                                        <div className="flex flex-col mt-5">
+                                            <Label htmlFor="male">Male</Label>
+                                            <span className="text-gray-400 mt-[2px] text-[12px]">(over 18 years old)</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem value="female" id="female" />
+                                        <div className="flex flex-col mt-5">
+                                            <Label htmlFor="female">Woman</Label>
+                                            <span className="text-gray-400 mt-[2px] text-[12px]">(over 18 years old)</span>
+                                        </div>
+                                    </div>
+                                </RadioGroup>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
 
                 <Separator />
 
+
                 <div className="mt-6">
-                    <h2 className="text-lg font-semibold text-gray-900 mt-3">Contact Information</h2>
-                    <p className="text-sm text-gray-500 mt-2 mb-10">
-                        Enter your contact information, including your email address and phone number.
-                    </p>
+                    <h2 className="text-lg font-semibold text-gray-900 mt-3 font-inter">Contact Information</h2>
+                    <p className="text-sm text-gray-500">Your contact information will be displayed on your profile</p>
                 </div>
 
                 <div className="flex gap-5">
@@ -326,13 +332,13 @@ export default function ProfileForm() {
                             )}
                         />
                     </div>
-
                 </div>
                 <div className="flex gap-5">
                     <div className="w-1/2 mx-auto">
                         <FormField
                             control={form.control}
                             name="country"
+                            disabled
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Country</FormLabel>
@@ -362,21 +368,8 @@ export default function ProfileForm() {
 
                 </div>
 
-                <div className="flex gap-5">
-                    <Button
-                        type="submit"
-                        variant="primary"
-                        size="default"
-                        className="px-16">Save</Button>
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="default"
-                        className="px-16"
-                        onClick={() => append({ value: "" })}
-                    >
-                        Cancel
-                    </Button>
+                <div className="flex justify-end">
+                    <Button type="submit">Update Profile</Button>
                 </div>
             </form>
         </Form>

@@ -24,6 +24,7 @@ import { db } from "@/utils/dbConfig";
 import { currentUser } from "@clerk/nextjs/server";
 import SuccessDialog from "./wallet/SuccessDialog";
 import { getOrders, getUserBalance } from "@/lib/user";
+import emptywallet from "../../../assets/images/emptywallet.svg";
 
 interface Order {
     id: string
@@ -179,6 +180,14 @@ export default async function DashboardPage() {
                                         <p className=" font-inter text-[#000000] font-medium text-[12px] ">{order.total} €</p>
                                     </div>
                                 ))}
+                                {orders.length === 0 && (
+                                    <div className="flex justify-center flex-col items-center mt-3">
+                                        <Image src={emptywallet} alt="emptywallet" width={150} height={150} />
+                                        {/* <h2 className="text-[#212121] text-[20px] font-inter font-semibold mt-5">No Orders</h2>
+                                        <p className="text-[#83838A] text-[14px] mt-3">You currently have no orders.</p> */}
+                                    </div>
+                                )}
+
                             </CardContent>
                         </Card>
                         <Card className="shadow-lg border-0">

@@ -3,6 +3,8 @@ import { headers } from 'next/headers'
 import { WebhookEvent } from '@clerk/nextjs/server'
 import { User } from '@/lib/types'
 import { createUser } from '@/lib/user'
+import { getUserCountry } from '@/lib/get_country'
+import { countryToCurrencyMap } from '@/lib/country_currency'
 
 
 export async function POST(req: Request) {
@@ -61,6 +63,30 @@ export async function POST(req: Request) {
             })
         }
 
+        //         id: serial("id").primaryKey(),
+        //   userId: text("userId").notNull().unique(),
+        //   email: text("email").notNull().unique(),
+        //   firstName: text("firstName"),
+        //   lastName: text("lastName"),
+        //   imageUrl: text("imageUrl"),
+        //   gender: text("gender"),
+        //   address: text("address"),
+        //   street: text("street"),
+        //   city: text("city"),
+        //   state: text("state"),
+        //   postcode: text("postcode"),
+        //   country: text("country"),
+        //   countryCode: text("countryCode"),
+        //   currency: text("currency"),
+        //   phone: text("phone"),
+        //   role: text("role").notNull().$type<"admin" | "user">().default("user"),
+
+
+
+
+        const userCountry = await getUserCountry();
+        const currency = countryToCurrencyMap[userCountry?.country_code2 || "US"] || "USD";
+
         const user = {
             userId: id,
             email: email_addresses[0].email_address,
@@ -70,7 +96,16 @@ export async function POST(req: Request) {
             gender: '',
             address: '',
             role: 'user',
-            ...(created_at ? { createdAt: created_at } : {})
+            ...(created_at ? { createdAt: created_at } : {}),
+            street: '',
+            city: userCountry?.city,
+            state: userCountry?.state_prov,
+            postcode: userCountry?.zipcode,
+            country: userCountry?.country_name,
+            countryCode: userCountry?.country_code2,
+            currency: userCountry?.currency.code || currency,
+            currencySymbol: userCountry?.currency.symbol,
+            phone: '',
         }
 
 

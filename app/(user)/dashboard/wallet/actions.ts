@@ -57,7 +57,7 @@ export const createAddFundsSession = async ({ price }: { price: number }) => {
         name: "Fund Wallet",
         images: ["https://soccerteria.vercel.app/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffund-wallet.3c73ae14.png&w=640&q=75"],
         default_price_data: {
-            currency: "EUR",
+            currency: "NGN",
             unit_amount: price
         }
     })
@@ -123,7 +123,7 @@ export const createPayForGameSession = async ({ price }: { price: number }) => {
         name: "Summer elGordo",
         images: ["https://soccerteria.vercel.app/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffund-wallet.3c73ae14.png&w=640&q=75"],
         default_price_data: {
-            currency: "EUR",
+            currency: "NGN",
             unit_amount: price
         }
     })

@@ -50,7 +50,7 @@ export function getMenuList(pathname: string): Group[] {
       groupLabel: "Contents",
       menus: [
         {
-          href: "/draws",
+          href: "draws",
           label: "Draws",
           active: pathname.includes("/draw"),
           icon: LoaderPinwheelIcon,
@@ -64,14 +64,14 @@ export function getMenuList(pathname: string): Group[] {
           submenus: []
         },
         {
-          href: "/dashboard/wallet",
+          href: "wallet",
           label: "Wallets",
           active: pathname.includes("/wallet"),
           icon: Wallet,
           submenus: []
         },
         {
-          href: "/communications",
+          href: "communications",
           label: "Communications",
           active: pathname.includes("/communications"),
           icon: Megaphone,
@@ -85,14 +85,14 @@ export function getMenuList(pathname: string): Group[] {
           submenus: []
         },
         {
-          href: "/combination",
+          href: "combination",
           label: "Combination",
           active: pathname.includes("/combination"),
           icon: Box,
           submenus: []
         },
         {
-          href: "/support",
+          href: "support",
           label: "Support",
           active: pathname.includes("/support"),
           icon: Tag,
