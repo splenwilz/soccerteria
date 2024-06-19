@@ -50,49 +50,49 @@ export function getMenuList(pathname: string): Group[] {
       groupLabel: "Contents",
       menus: [
         {
-          href: "draws",
+          href: "/dashboard/draws",
           label: "Draws",
           active: pathname.includes("/draw"),
           icon: LoaderPinwheelIcon,
           submenus: []
         },
         {
-          href: "orders",
+          href: "/dashboard/orders",
           label: "Orders",
           active: pathname.includes("/orders"),
           icon: Notebook,
           submenus: []
         },
         {
-          href: "wallet",
+          href: "/dashboard/wallet",
           label: "Wallets",
           active: pathname.includes("/wallet"),
           icon: Wallet,
           submenus: []
         },
         {
-          href: "communications",
+          href: "/dashboard/communications",
           label: "Communications",
           active: pathname.includes("/communications"),
           icon: Megaphone,
           submenus: []
         },
         {
-          href: "profile",
+          href: "/dashboard/profile",
           label: "Profile",
           active: pathname.includes("/profile"),
           icon: SquareUser,
           submenus: []
         },
         {
-          href: "combination",
+          href: "/dashboard/combination",
           label: "Combination",
           active: pathname.includes("/combination"),
           icon: Box,
           submenus: []
         },
         {
-          href: "support",
+          href: "/dashboard/support",
           label: "Support",
           active: pathname.includes("/support"),
           icon: Tag,

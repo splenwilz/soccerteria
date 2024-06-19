@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Soccerteria
+
+[Soccerteria](https://soccerteria.com) is a sports betting platform that connects bettors with sports leagues and bookmakers. It is a peer-to-peer betting platform that enables users to place bets directly against other users.
 
 ## Getting Started
 

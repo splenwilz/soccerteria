@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog"
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
-import successicon from '../../../../assets/images/successicon.svg'
+import successicon from '../assets/images/successicon.svg'
 
 export default function SuccessDialog() {
     const searchParams = useSearchParams()
@@ -32,7 +32,7 @@ export default function SuccessDialog() {
                 onOpenChange={(open) => {
                     setOpenDialog(open);
                     if (!open) {
-                        router.push('/dashboard/wallet');
+                        router.push('/dashboard');
                     }
                 }}
             >

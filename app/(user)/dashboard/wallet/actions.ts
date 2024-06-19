@@ -1,18 +1,18 @@
 "use server"
 
+import { SelectedOptions } from "@/components/Prediction"
 import { stripe } from "@/lib/stripe"
+import { getUser } from "@/lib/user"
 import { db } from "@/utils/dbConfig"
-import { OrdersSchema } from "@/utils/schema"
+import { GameOrdersSchema, WalletOrdersSchema } from "@/utils/schema"
+// import { OrdersSchema } from "@/utils/schema"
 import { currentUser } from "@clerk/nextjs/server"
+import { PredictionData } from "../summary/DataTable"
+import { eq } from "drizzle-orm"
+import { Order } from "@/lib/types"
+import { countryToCurrencyMap } from "@/lib/country_currency"
 
-// TODO - Add country to currency mapping
-// // Define the type for the country to currency map
-const countryToCurrencyMap: Record<string, string> = {
-    NG: "NGN", // Nigeria
-    US: "USD", // United States
-    GB: "GBP", // United Kingdom
-    // Add more mappings as needed
-};
+
 
 const getUserCountry = async () => {
     try {
@@ -57,52 +57,37 @@ export const createAddFundsSession = async ({ price }: { price: number }) => {
         name: "Fund Wallet",
         images: ["https://soccerteria.vercel.app/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffund-wallet.3c73ae14.png&w=640&q=75"],
         default_price_data: {
-            currency: "NGN",
+            currency,
             unit_amount: price
         }
     })
 
     // Add order to your database
-
     const order = await db
-        .insert(OrdersSchema)
+        .insert(WalletOrdersSchema)
         .values({
             userId: user!.id,
             status: "pending",
             total: (price / 100).toString(),
+            checkoutLink: "",
             createdAt: new Date(),
             updatedAt: new Date(),
         })
         .returning({
-            id: OrdersSchema.id,
-            total: OrdersSchema.total,
+            id: WalletOrdersSchema.id,
+            total: WalletOrdersSchema.total,
         })
-
-
-
-    // const order = await db
-    //     .insert(OrdersSchema)
-    //     .values({
-    //         userId: user!.id as string,
-    //         status: "pending",
-    //         total: (price / 100).toString(),
-    //         createdAt: new Date(),
-    //         updatedAt: new Date(),
-    //     })
-    //     .returning({
-    //         id: OrdersSchema.id,
-    //         total: OrdersSchema.total,
-    //     })
 
 
     const stripeSession = await stripe.checkout.sessions.create({
         success_url: `${process.env.NEXT_PUBLIC_DOMAIN}/dashboard/wallet?orderId=${order[0].id}`,
-        cancel_url: `${process.env.NEXT_PUBLIC_DOMAIN}/cart`,
+        cancel_url: `${process.env.NEXT_PUBLIC_DOMAIN}/wallet`,
         payment_method_types: ["card"],
         mode: "payment",
         metadata: {
             userId: user!.id,
-            orderId: order[0].id
+            orderId: order[0].id,
+            transactionType: "walletTopUp"
         },
         line_items: [
             {
@@ -112,37 +97,64 @@ export const createAddFundsSession = async ({ price }: { price: number }) => {
         ]
     })
 
+    // Update Checkout Link
+    const updateOrder = await db
+        .update(WalletOrdersSchema)
+        .set({ checkoutLink: stripeSession.url })
+        .where(eq(WalletOrdersSchema.id, order[0].id))
+        .returning()
+
     return { url: stripeSession.url }
 }
 
 
-export const createPayForGameSession = async ({ price }: { price: number }) => {
+export const createPayForGameSession = async ({ price, gameOptions, id }: { price: number, gameOptions: PredictionData, id: string | null }) => {
     const user = await currentUser();
+    const useFromDB = await getUser(user!.id);
+    let order;
 
     const product = await stripe.products.create({
         name: "Summer elGordo",
         images: ["https://soccerteria.vercel.app/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Ffund-wallet.3c73ae14.png&w=640&q=75"],
         default_price_data: {
-            currency: "NGN",
+            currency: useFromDB[0].currency || 'USD',
             unit_amount: price
         }
     })
 
-    // Add order to your database
+    if (id) {
+        // Update existing order
+        order = await db
+            .update(GameOrdersSchema)
+            .set({
+                total: (price / 100).toString(),
+                gameOptions: gameOptions,
+                updatedAt: new Date(),
+            })
+            .where(eq(GameOrdersSchema.id, id))
+            .returning({
+                id: GameOrdersSchema.id,
+                total: GameOrdersSchema.total,
+            });
 
-    const order = await db
-        .insert(OrdersSchema)
-        .values({
-            userId: user!.id,
-            status: "pending",
-            total: (price / 100).toString(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        })
-        .returning({
-            id: OrdersSchema.id,
-            total: OrdersSchema.total,
-        })
+    } else {
+        // Create new order
+        order = await db
+            .insert(GameOrdersSchema)
+            .values({
+                userId: user!.id,
+                status: "pending",
+                total: (price / 100).toString(),
+                gameOptions: gameOptions,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            })
+            .returning({
+                id: GameOrdersSchema.id,
+                total: GameOrdersSchema.total,
+            });
+    }
+
 
 
     const stripeSession = await stripe.checkout.sessions.create({
@@ -152,7 +164,8 @@ export const createPayForGameSession = async ({ price }: { price: number }) => {
         mode: "payment",
         metadata: {
             userId: user!.id,
-            orderId: order[0].id
+            orderId: order[0].id,
+            transactionType: "gamePayment"
         },
         line_items: [
             {
@@ -160,6 +173,7 @@ export const createPayForGameSession = async ({ price }: { price: number }) => {
                 quantity: 1
             }
         ]
+
     })
 
     return { url: stripeSession.url }

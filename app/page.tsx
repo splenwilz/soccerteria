@@ -6,8 +6,6 @@ import Navigation from "@/components/Navigation";
 import TableResources from "@/components/TableResources";
 import Welcome from "@/components/Welcome";
 import YoutubeVideoContainer from "@/components/YoutubeVideoContainer";
-import Image from "next/image";
-import SuccessDialog from "./(user)/dashboard/wallet/SuccessDialog";
 
 export default function Home() {
   return (

@@ -1,6 +1,6 @@
 import { stripe } from "@/lib/stripe"
 import { db } from "@/utils/dbConfig"
-import { OrdersSchema, UserSchema, WalletSchema } from "@/utils/schema"
+import { GameOrdersSchema, OrdersSchema, UserSchema, WalletOrdersSchema, WalletSchema } from "@/utils/schema"
 import { currentUser } from "@clerk/nextjs/server"
 import { eq } from "drizzle-orm"
 import { headers } from "next/headers"
@@ -22,40 +22,57 @@ export async function POST(req: Request) {
             }
             const session = event.data.object as Stripe.Checkout.Session
 
-            const { userId, orderId } = session.metadata || { userId: null, orderId: null }
+            const { userId, orderId, transactionType } = session.metadata || { userId: null, orderId: null, transactionType: null }
 
-            if (!userId || !orderId) {
+            if (!userId || !orderId || !transactionType) {
                 throw new Error("Invalid metadata")
             }
 
-            // Update order status in your database         
-            const updateOrder = await db.update(OrdersSchema)
-                .set({ status: "complete" })
-                .where(eq(OrdersSchema.id, parseInt(orderId)));
-
-            const user = await db.query.WalletSchema.findFirst({
+            const wallet = await db.query.WalletSchema.findFirst({
                 where: eq(WalletSchema.userId, userId),
 
             });
 
-            if (user) {
-                console.log(`updating user balance ${user.balance}`)
-                const amountSubtotal = (session.amount_subtotal || 0) / 100;
-                const newBalance = (parseInt(user.balance || "0") + amountSubtotal).toString();
-                await db.update(WalletSchema).set({
-                    balance: newBalance,
-                    updatedAt: new Date(),
-                }).where(eq(WalletSchema.userId, userId));
-
+            if (transactionType === 'gamePayment') {
+                // Update order status in your database         
+                const updateOrder = await db.update(GameOrdersSchema)
+                    .set({ status: "complete" })
+                    .where(eq(GameOrdersSchema.id, orderId));
             } else {
-                console.log(`creating user balance ${session.amount_subtotal?.toString() || "0"}`)
-                await db.insert(WalletSchema).values({
-                    userId: userId,
-                    balance: session.amount_subtotal?.toString() || "0",
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                });
+                // Update order status in your database         
+                const updateOrder = await db.update(WalletOrdersSchema)
+                    .set({ status: "complete" })
+                    .where(eq(WalletOrdersSchema.id, orderId));
+
+                if (wallet) {
+                    console.log(`updating user balance ${wallet.balance}`)
+                    const amountSubtotal = (session.amount_subtotal || 0) / 100;
+                    const newBalance = (parseInt(wallet.balance || "0") + amountSubtotal).toString();
+                    await db.update(WalletSchema).set({
+                        balance: newBalance,
+                        updatedAt: new Date(),
+                    }).where(eq(WalletSchema.userId, userId));
+                } else {
+                    console.log(`creating user balance ${session.amount_subtotal?.toString() || "0"}`)
+                    const amountSubtotal = (session.amount_subtotal || 0) / 100;
+                    const newBalance = amountSubtotal.toString();
+                    await db.insert(WalletSchema).values({
+                        userId: userId,
+                        balance: newBalance,
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                    });
+                }
             }
+
+            // Update order status in your database         
+            // const updateOrder = await db.update(OrdersSchema)
+            //     .set({ status: "complete" })
+            //     .where(eq(OrdersSchema.id, parseInt(orderId)));
+
+
+
+
         }
         return NextResponse.json({ result: event, 'ok': true })
     } catch (error) {

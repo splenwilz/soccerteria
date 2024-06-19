@@ -22,9 +22,11 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { db } from "@/utils/dbConfig";
 import { currentUser } from "@clerk/nextjs/server";
-import SuccessDialog from "./wallet/SuccessDialog";
-import { getOrders, getUserBalance } from "@/lib/user";
+import SuccessDialog from "../../../components/SuccessDialog";
+import { getOrders, getUser, getUserBalance } from "@/lib/user";
 import emptywallet from "../../../assets/images/emptywallet.svg";
+import { formatCurrency } from "@/lib/format_currency";
+import { formatOrderId } from "@/lib/format_id";
 
 interface Order {
     id: string
@@ -78,10 +80,12 @@ export default async function DashboardPage() {
 
 
     const user = await currentUser();
+    const userFromDb = await getUser(user!.id)
     const userBalance = await getUserBalance(user!.id);
-    const firstUserBalance = userBalance[0] || {};
-    const balance = firstUserBalance.balance || '0';
     const orders = await getOrders(user!.id);
+
+
+
 
     return (
         <ContentLayout title="Dashboard">
@@ -97,7 +101,6 @@ export default async function DashboardPage() {
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
                         <Card className="shadow-lg border-0">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-
                                 <div className="flex justify-between">
                                     <div className="flex gap-2 ">
                                         <div className="border bg-[#F2F7FD] border-[#CFDDEF] p-1 px-2 rounded-sm h-6 ">
@@ -111,10 +114,8 @@ export default async function DashboardPage() {
                                     <p className="text-sm font-inter text-muted-foreground -mt-1">View</p>
                                     <ArrowRight className="h-4 w-4 text-muted-foreground" />
                                 </Link>
-
                             </CardHeader>
                             <div className="mx-5 h-[1px] bg-[#EAEAEA] opacity-65 my-2"></div>
-
                             <CardContent>
                                 <div className="flex mt-5">
                                     <div className="basis-1/2 flex justify-between flex-col">
@@ -164,7 +165,6 @@ export default async function DashboardPage() {
                                 <div className="mt-5">
                                     <h3 className="font-inter font-medium mb-2">Latest orders</h3>
                                 </div>
-
                                 {orders.slice(0, 5).map((order, index) => (
                                     <div key={index} className="flex justify-between mt-5">
                                         <div className="flex justify-between flex-col ">
@@ -172,19 +172,23 @@ export default async function DashboardPage() {
                                                 <div className="flex gap-1">
                                                     <span className="font-inter text-[#83838A] text-[12px]">{order.createdAt ? new Date(order.createdAt).toLocaleDateString("en-GB", { day: '2-digit', month: 'short', year: 'numeric' }) : 'No date available'}</span>
                                                     <span className="h-4 w-1"></span>
-                                                    <span className="font-inter text-[#000000] font-semibold text-[12px] mr-2 underline">XPL 80668 DB</span>
+                                                    {/* Order should look like this XPL 80668 DB */}
+                                                    <Link href={`dashboard/orders/${order.id}`} className="font-inter text-[#000000] font-semibold text-[12px] mr-2 underline uppercase">{formatOrderId(order.id)}</Link>
                                                     <Badge variant={order.status || 'destructive'} className="-mt-[2px] ">{order.status}</Badge>
                                                 </div>
                                             </div>
                                         </div>
-                                        <p className=" font-inter text-[#000000] font-medium text-[12px] ">{order.total} €</p>
+                                        <p className=" font-inter text-[#000000] font-medium text-[12px] ">
+                                            {formatCurrency({ amount: parseInt(order.total || '0'), currency: userFromDb[0].currency || '' })}
+                                        </p>
                                     </div>
                                 ))}
                                 {orders.length === 0 && (
-                                    <div className="flex justify-center flex-col items-center mt-3">
-                                        <Image src={emptywallet} alt="emptywallet" width={150} height={150} />
-                                        {/* <h2 className="text-[#212121] text-[20px] font-inter font-semibold mt-5">No Orders</h2>
-                                        <p className="text-[#83838A] text-[14px] mt-3">You currently have no orders.</p> */}
+                                    <div className="basis-1/2 flex justify-between flex-col">
+                                        <div className="">
+                                            <p className="font-inter text-[#83838A] text-[14px]">You have no orders yet</p>
+                                        </div>
+
                                     </div>
                                 )}
 
@@ -320,9 +324,6 @@ export default async function DashboardPage() {
                                             </p>
                                         </div>
                                     </div>
-                                    {/* <button className="rounded-sm mt-16 mb-1 border border-[#2366BC] text-[#2366BC] font-inter text-[16px] px-14 py-2">
-                                        Personal Data
-                                    </button> */}
                                     <Link className="rounded-sm text-center mt-16 mb-1 border border-[#2366BC] text-[#2366BC] font-inter text-[16px] px-14 py-2" href={"/dashboard/profile"}>
                                         Personal Data
                                     </Link>

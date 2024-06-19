@@ -2,20 +2,21 @@
 import {
     Table,
     TableBody,
-    TableCell,
     TableHead,
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import { loadStoredPredictionDataFromLocalStorage } from "@/lib/prediction_data";
 import { BoltIcon, XMarkIcon } from "@heroicons/react/16/solid"
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-export interface SelectedOptions {
-    [key: string]: string[];
-}
+export type SelectedOptions = { [key: string]: Option[] };
+
+type Option = '1' | 'X' | '2' | '0' | 'M';
 export default function Prediction() {
-    const demodata = [
+    const demodata: string[][] = [
         ['Borussia Dortmund', 'At Madrid'],
         ['Rayo Vallecano', 'Getafe'],
         ['Mallorca', 'Real Madrid'],
@@ -140,9 +141,17 @@ export default function Prediction() {
     const [selectedGamesCount, setSelectedGamesCount] = useState(0);
     let selectedTeams = Object.keys(selectedOptions).length
 
-    const handleOptionSelect = (teamId: string, option: string) => {
+
+    React.useEffect(() => {
+        const storedPredictionData = loadStoredPredictionDataFromLocalStorage();
+        setSelectedOptions(storedPredictionData.selectedOptions);
+    }, []);
+
+
+    const handleOptionSelect = (teamId: string, option: Option, isFifteenthGame: boolean = false, teamType: string = '') => {
         setSelectedOptions((prevOptions) => {
-            const teamOptions = prevOptions[teamId] || [];
+            const key = isFifteenthGame ? `game15_${teamType}` : teamId;
+            const teamOptions = prevOptions[key] || [];
 
             let updatedTeamOptions;
 
@@ -154,14 +163,18 @@ export default function Prediction() {
                 updatedTeamOptions = [...teamOptions, option];
             }
 
+            // Sort the options in the specified order
+            const optionOrder = ['1', 'X', '2', '0', 'M'];
+            updatedTeamOptions.sort((a, b) => optionOrder.indexOf(a) - optionOrder.indexOf(b));
+
             // If there are no options left for the team, remove the team from the list
             if (updatedTeamOptions.length === 0) {
-                const { [teamId]: _, ...restOptions } = prevOptions;
+                const { [key]: _, ...restOptions } = prevOptions;
                 return restOptions;
             } else {
                 return {
                     ...prevOptions,
-                    [teamId]: updatedTeamOptions,
+                    [key]: updatedTeamOptions,
                 };
             }
         });
@@ -173,13 +186,13 @@ export default function Prediction() {
             let doubles = 0;
             let triples = 0;
             let selectedGames = 0;
-            let lastItemSelected1 = selectedOptions['lastItem1']?.length || 0;
-            let lastItemSelected2 = selectedOptions['lastItem2']?.length || 0;
+            let game15Home = selectedOptions['game15_home']?.length || 0;
+            let game15Away = selectedOptions['game15_away']?.length || 0;
 
-            console.warn(lastItemSelected1, lastItemSelected2);
+            console.warn(game15Home, game15Away);
 
             Object.keys(selectedOptions).forEach(key => {
-                if (key !== 'lastItem1' && key !== 'lastItem2') {
+                if (key !== 'game15_home' && key !== 'game15_away') {
                     const options = selectedOptions[key];
                     selectedGames += options.length;
                     if (options.length === 2) {
@@ -193,32 +206,11 @@ export default function Prediction() {
             let key = `${doubles}-${triples}`;
             let total = combinationAmounts[key] || 0.75;
 
-
-            if (lastItemSelected1 === 4) {
-                if (lastItemSelected2 === 1) {
-                    total *= 4;
-                } else if (lastItemSelected2 === 2) {
-                    total *= 8;
-                } else if (lastItemSelected2 === 3) {
-                    total *= 12;
-                } else if (lastItemSelected2 === 4) {
-                    total *= 16;
-                }
-            } else if (lastItemSelected2 === 4) {
-                if (lastItemSelected1 === 1) {
-                    total *= 4;
-                } else if (lastItemSelected1 === 2) {
-                    total *= 8;
-                } else if (lastItemSelected1 === 3) {
-                    total *= 12;
-                } else if (lastItemSelected1 === 4) {
-                    total *= 16;
-                }
+            // Calculate the combinations for the 15th game
+            if (game15Home > 0 && game15Away > 0) {
+                let lastGameCombinations = game15Home * game15Away;
+                total *= lastGameCombinations;
             }
-
-            // Find out if the user has selected all 15 games
-
-
 
             setTotalAmount(total);
             setDoublesCount(doubles);
@@ -230,9 +222,25 @@ export default function Prediction() {
     }, [selectedOptions]);
 
     const handleGameSubmit = () => {
-        // Store the selected options, total amount, doubles count, and triples count in an object and store it in local storage
+        setLoading(true);
+
+        // Get the options for the last game
+        const game15_home = selectedOptions['game15_home'] || [];
+        const game15_away = selectedOptions['game15_away'] || [];
+
+        const lastTeam = `${demodata[14][0]} - ${demodata[14][1]}`;
+        const lastTeamSelection = `${game15_home.join(',')} - ${game15_away.join(',')}`;
+
+        // Remove game15_home and game15_away from selectedOptions and add lastTeamAndSelection
+        const selectedOptions2 = {
+            ...Object.fromEntries(
+                Object.entries(selectedOptions).filter(([key]) => key !== 'game15_home' && key !== 'game15_away')
+            ),
+            [lastTeam]: lastTeamSelection
+        };
+
         const predictionData = {
-            selectedOptions,
+            selectedOptions: selectedOptions2,
             totalAmount,
             doublesCount,
             triplesCount,
@@ -241,7 +249,10 @@ export default function Prediction() {
 
         // Redirect to the next page
         router.push('/dashboard/summary');
+        setLoading(false);
     };
+
+    const [loading, setLoading] = useState(false)
 
     return (
         <div className="bg-[#F1F0FE] p-2 pl-3 pr-3 rounded-lg max-w-[700px] sm:max-w-[700px] md:max-w-[400px] xl:max-w-[700px]">
@@ -270,23 +281,23 @@ export default function Prediction() {
                     {demodata.map((data, index) => {
                         const teamId = data[0] + ' - ' + data[1];
                         if (index === demodata.length - 1) {
-                            // Split the last item into two rows
+                            // Split the last item into two rows for the 15th game
                             return (
                                 <React.Fragment key={index}>
                                     <tr>
                                         <td className="font-medium pl-4 text-[12px]" rowSpan={2}>15</td>
                                         <td className="font-medium text-[12px] p-1">{teamId}</td>
-                                        <td className="p-1"><button onClick={() => handleOptionSelect('lastItem1', '0')} className={`rounded-full text-[12px] px-[14.5px] py-2 border border-[#00B660] ${selectedOptions['lastItem1']?.includes('0') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>0</button></td>
-                                        <td className="p-1"><button onClick={() => handleOptionSelect('lastItem1', '1')} className={`rounded-full text-[12px] px-[16px] py-2 border border-[#00B660] ${selectedOptions['lastItem1']?.includes('1') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>1</button></td>
-                                        <td className="p-1"><button onClick={() => handleOptionSelect('lastItem1', '2')} className={`rounded-full text-[12px] px-[14.5px] py-2 border border-[#00B660] ${selectedOptions['lastItem1']?.includes('2') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>2</button></td>
-                                        <td className="p-1"><button onClick={() => handleOptionSelect('lastItem1', 'M')} className={`rounded-full text-[12px] px-[12.5px] py-2 border border-[#00B660] ${selectedOptions['lastItem1']?.includes('M') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>M</button></td>
+                                        <td className="p-1"><button onClick={() => handleOptionSelect(teamId, '0', true, 'home')} className={`rounded-full text-[12px] px-[14.5px] py-2 border border-[#00B660] ${selectedOptions['game15_home']?.includes('0') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>0</button></td>
+                                        <td className="p-1"><button onClick={() => handleOptionSelect(teamId, '1', true, 'home')} className={`rounded-full text-[12px] px-[16px] py-2 border border-[#00B660] ${selectedOptions['game15_home']?.includes('1') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>1</button></td>
+                                        <td className="p-1"><button onClick={() => handleOptionSelect(teamId, '2', true, 'home')} className={`rounded-full text-[12px] px-[14.5px] py-2 border border-[#00B660] ${selectedOptions['game15_home']?.includes('2') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>2</button></td>
+                                        <td className="p-1"><button onClick={() => handleOptionSelect(teamId, 'M', true, 'home')} className={`rounded-full text-[12px] px-[12.5px] py-2 border border-[#00B660] ${selectedOptions['game15_home']?.includes('M') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>M</button></td>
                                     </tr>
                                     <tr>
                                         <td className="font-medium text-[12px] p-1">{teamId}</td>
-                                        <td className="p-1"><button onClick={() => handleOptionSelect('lastItem2', '0')} className={`rounded-full text-[12px] px-[14.5px] py-2 border border-[#00B660] ${selectedOptions['lastItem2']?.includes('0') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>0</button></td>
-                                        <td className="p-1"><button onClick={() => handleOptionSelect('lastItem2', '1')} className={`rounded-full text-[12px] px-[16px] py-2 border border-[#00B660] ${selectedOptions['lastItem2']?.includes('1') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>1</button></td>
-                                        <td className="p-1"><button onClick={() => handleOptionSelect('lastItem2', '2')} className={`rounded-full text-[12px] px-[15px] py-2 border border-[#00B660] ${selectedOptions['lastItem2']?.includes('2') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>2</button></td>
-                                        <td className="p-1"><button onClick={() => handleOptionSelect('lastItem2', 'M')} className={`rounded-full text-[12px] px-[12.5px] py-2 border border-[#00B660] ${selectedOptions['lastItem2']?.includes('M') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>M</button></td>
+                                        <td className="p-1"><button onClick={() => handleOptionSelect(teamId, '0', true, 'away')} className={`rounded-full text-[12px] px-[14.5px] py-2 border border-[#00B660] ${selectedOptions['game15_away']?.includes('0') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>0</button></td>
+                                        <td className="p-1"><button onClick={() => handleOptionSelect(teamId, '1', true, 'away')} className={`rounded-full text-[12px] px-[16px] py-2 border border-[#00B660] ${selectedOptions['game15_away']?.includes('1') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>1</button></td>
+                                        <td className="p-1"><button onClick={() => handleOptionSelect(teamId, '2', true, 'away')} className={`rounded-full text-[12px] px-[15px] py-2 border border-[#00B660] ${selectedOptions['game15_away']?.includes('2') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>2</button></td>
+                                        <td className="p-1"><button onClick={() => handleOptionSelect(teamId, 'M', true, 'away')} className={`rounded-full text-[12px] px-[12.5px] py-2 border border-[#00B660] ${selectedOptions['game15_away']?.includes('M') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>M</button></td>
                                     </tr>
                                 </React.Fragment>
                             );
@@ -298,11 +309,11 @@ export default function Prediction() {
                                     <td className="p-1"><button onClick={() => handleOptionSelect(teamId, '1')} className={`rounded-full px-[16px] text-[12px] py-2 border border-[#00B660] ${selectedOptions[teamId]?.includes('1') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>1</button></td>
                                     <td className="p-1"><button onClick={() => handleOptionSelect(teamId, 'X')} className={`rounded-full px-[14.5px] text-[12px] py-2 border border-[#00B660] ${selectedOptions[teamId]?.includes('X') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>X</button></td>
                                     <td className="p-1"><button onClick={() => handleOptionSelect(teamId, '2')} className={`rounded-full px-[14.5px] text-[12px] py-2 border border-[#00B660] ${selectedOptions[teamId]?.includes('2') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>2</button></td>
-                                    {/* <td className="font-medium pl-4 py-1 text-[12px]">{index + 1}</td> */}
                                 </tr>
                             );
                         }
                     })}
+
 
                 </TableBody>
             </Table>
@@ -344,7 +355,13 @@ export default function Prediction() {
                         className="bg-[#2366BC] disabled:bg-[#2366BC]/50 disabled:cursor-not-allowed text-white font-inter font-semibold text-[16px] px-7 py-2 rounded-sm"
                         disabled={selectedTeams < 16}
                     >
-                        Play Now
+                        <div className="flex gap-4 justify-center">
+                            <span className="">
+                                Play Now
+                            </span>
+                            {loading && <Loader2 className="animate-spin w-4" />}
+
+                        </div>
                     </button>
                 </div>
             </div>

@@ -1,3 +1,5 @@
+import { PredictionData } from "@/app/(user)/dashboard/summary/DataTable";
+import { SelectedOptions } from "@/components/Prediction";
 
 export type Role<T> = T extends "user" | "admin" ? T : never;
 
@@ -42,11 +44,22 @@ export interface User {
     createdAt?: number | null;
 }
 
-export type Order = {
-    id: number;
+// export type Order = {
+//     id: number;
+//     userId: string | null;
+//     status: "pending" | "complete" | "cancel" | "default" | "secondary" | "destructive" | "outline" | null;
+//     total: string | null;
+//     createdAt: Date | null;
+//     updatedAt: Date | null;
+// };
+export interface Order {
+    id: string;
     userId: string | null;
     status: "pending" | "complete" | "cancel" | "default" | "secondary" | "destructive" | "outline" | null;
     total: string | null;
+    gameOptions?: PredictionData;
+    checkoutLink?: string | null;
     createdAt: Date | null;
     updatedAt: Date | null;
-};
+}
+

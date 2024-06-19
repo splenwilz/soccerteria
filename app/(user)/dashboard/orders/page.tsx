@@ -28,6 +28,10 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Eye } from "lucide-react";
+import { currentUser } from "@clerk/nextjs/server";
+import { getOrders, getUser, getUserBalance } from "@/lib/user";
+import { formatCurrency } from "@/lib/format_currency";
+import { formatOrderId } from "@/lib/format_id";
 
 interface UpcomingDemo {
     id: string
@@ -36,7 +40,7 @@ interface UpcomingDemo {
     status: "pending" | "complete" | "cancel"
 }
 
-export default function OrdersPage() {
+export default async function OrdersPage() {
     const upcomingDemo: UpcomingDemo[] = [
         {
             id: "XPL 80668 DB",
@@ -93,6 +97,11 @@ export default function OrdersPage() {
             status: "pending",
         },
     ]
+
+    const user = await currentUser();
+    const userFromDb = await getUser(user!.id)
+    const userBalance = await getUserBalance(user!.id);
+    const orders = await getOrders(user!.id);
     return (
         <ContentLayout title="">
             <Tabs defaultValue="overview" className="space-y-4">
@@ -104,7 +113,7 @@ export default function OrdersPage() {
 
                     <Card>
                         <CardContent>
-                            <Tabs defaultValue="upcoming" className="w-full">
+                            <Tabs defaultValue="results" className="w-full">
                                 <div className="flex justify-center mt-5 mb-5">
                                     <TabsList className="justify-between items-center w-[80%] bg-transparent">
                                         <TabsTrigger value="results">Results</TabsTrigger>
@@ -116,14 +125,55 @@ export default function OrdersPage() {
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
-                                                <TableHead className="text-center ">Game</TableHead>
-                                                <TableHead className="text-center ">Date</TableHead>
-                                                <TableHead className="text-center ">State</TableHead>
-                                                <TableHead className="text-center ">Action</TableHead>
+                                                <TableHead className="">Order Id</TableHead>
+                                                <TableHead className="">Transaction Type</TableHead>
+                                                <TableHead className="">Amount</TableHead>
+                                                <TableHead className="text-center ">Status</TableHead>
+                                                <TableHead className=" text-center">Purchase Date</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody className="mt-2">
-                                            {upcomingDemo.map((upcoming) => (
+                                            {orders.map((order) => (
+                                                <TableRow key={order.id}>
+                                                    <TableCell className="font-medium py-4">
+                                                        <Link href={`${order.checkoutLink ? order.checkoutLink : `/dashboard/orders/${order.id}`}`} className="text-blue-600 text-[14px] uppercase underline">{formatOrderId(order.id)}</Link>
+                                                    </TableCell>
+                                                    <TableCell className=" py-4">
+                                                        {order.checkoutLink ? 'Wallet Topup' : 'Game Purchase'}
+                                                    </TableCell>
+                                                    <TableCell className=" py-4">
+                                                        {formatCurrency({ amount: parseInt(order.total || '0'), currency: userFromDb[0].currency || '' })}
+                                                    </TableCell>
+                                                    <TableCell className="text-center py-4">
+                                                        <Badge variant={order.status}>{order.status}</Badge>
+                                                    </TableCell>
+                                                    <TableCell className="py-4 text-center">
+                                                        {order.createdAt
+                                                            ? new Date(order.createdAt).toLocaleDateString("en-GB", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+                                                            : 'No date available'}
+                                                    </TableCell>
+                                                    {/* <TableCell className="text-center py-4">
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger>
+                                                                <Eye size={20} className="text-muted-foreground" />
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent>
+                                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                                <DropdownMenuSeparator />
+                                                                <DropdownMenuItem>
+                                                                    <Link href="/draws/1" >View</Link>
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem>
+                                                                    <Link href="/draws/1/edit">Edit</Link>
+                                                                </DropdownMenuItem>
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
+                                                    </TableCell> */}
+                                                </TableRow>
+                                            ))}
+
+
+                                            {/* {upcomingDemo.map((upcoming) => (
                                                 <TableRow key={upcoming.id}>
                                                     <TableCell className="text-center font-medium py-4">
                                                         <Link href="/draws/1" className="text-blue-600 text-[14px] underline">{upcoming.game}</Link>
@@ -150,7 +200,7 @@ export default function OrdersPage() {
                                                         </DropdownMenu>
                                                     </TableCell>
                                                 </TableRow>
-                                            ))}
+                                            ))} */}
 
                                         </TableBody>
                                     </Table>

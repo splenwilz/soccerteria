@@ -35,109 +35,112 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { Order } from "@/lib/types"
+import { Order, User } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
+import { formatCurrency } from "@/lib/format_currency"
+import { formatOrderId } from "@/lib/format_id"
+import Link from "next/link"
 
-export const columns: ColumnDef<Order>[] = [
-    {
-        id: "select",
-        header: ({ table }) => (
-            <Checkbox
-                checked={
-                    table.getIsAllPageRowsSelected() ||
-                    (table.getIsSomePageRowsSelected() && "indeterminate")
-                }
-                className="ml-[8px]"
-                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                aria-label="Select all"
-            />
-        ),
-        cell: ({ row }) => (
-            <Checkbox
-                checked={row.getIsSelected()}
-                onCheckedChange={(value) => row.toggleSelected(!!value)}
-                aria-label="Select row"
-                className="ml-4"
-            />
-        ),
-        enableSorting: false,
-        enableHiding: false,
-    },
-
-    {
-        accessorKey: "userId",
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                >
-                    User ID
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-            )
-        },
-        cell: ({ row }) => <div className="lowercase text-[13px] text-[#26292A] font-inter">{row.getValue("userId")}</div>,
-    },
-    {
-        accessorKey: "total",
-        header: () => <div className="text-left">Amount</div>,
-        cell: ({ row }) => {
-            const amount = parseInt(row.getValue("total"))
-
-            // Format the amount as a dollar amount
-            const formatted = new Intl.NumberFormat("en-US", {
-                style: "currency",
-                currency: "EUR",
-            }).format(amount)
-
-            return <div className="text-left text-[#2366BC] text-[13px] font-inter">{formatted}</div>
-        },
-    },
-    {
-        accessorKey: "status",
-        header: "Status",
-        cell: ({ row }) => (
-            <Badge variant={row.getValue("status")}>{row.getValue("status")}</Badge>
-        ),
-    },
-    {
-        id: "actions",
-        enableHiding: false,
-        cell: ({ row }) => {
-            const payment = row.original
-
-            return (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem
-                            onClick={() => navigator.clipboard.writeText(payment.id.toString())}
-                        >
-                            Copy payment ID
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>View customer</DropdownMenuItem>
-                        <DropdownMenuItem>View payment details</DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            )
-        },
-    },
-]
 
 export function DataTable({
-    data }: { data: Order[] }) {
+    data, user }: { data: Order[], user: User }) {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
         []
     )
+    const columns: ColumnDef<Order>[] = [
+        {
+            id: "select",
+            header: ({ table }) => (
+                <Checkbox
+                    checked={
+                        table.getIsAllPageRowsSelected() ||
+                        (table.getIsSomePageRowsSelected() && "indeterminate")
+                    }
+                    className="ml-[8px]"
+                    onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                    aria-label="Select all"
+                />
+            ),
+            cell: ({ row }) => (
+                <Checkbox
+                    checked={row.getIsSelected()}
+                    onCheckedChange={(value) => row.toggleSelected(!!value)}
+                    aria-label="Select row"
+                    className="ml-4"
+                />
+            ),
+            enableSorting: false,
+            enableHiding: false,
+        },
+        {
+            accessorKey: "id",
+            header: () => <div className="text-left">Order Id</div>,
+            cell: ({ row }) => {
+                return <Link
+                    href={`${row.getValue("checkoutLink") ? row.getValue("checkoutLink") : `/dashboard/orders/${row.getValue("id")}`}`}
+                    className="text-blue-600 text-[13px] uppercase underline"
+                >
+                    {formatOrderId(row.getValue("id"))}
+                </Link>
+            },
+        },
+        {
+            accessorKey: "checkoutLink",
+            header: () => <div className="text-left">Game Type</div>,
+            cell: ({ row }) => {
+                const amount = parseInt(row.getValue("total"))
+                return <div className="text-left text-[13px] font-inter">
+                    {row.getValue("checkoutLink") ? "Wallet Top Up" : "Game Purchase"}
+                </div>
+            },
+        },
+        {
+            accessorKey: "total",
+            header: () => <div className="text-left">Amount</div>,
+            cell: ({ row }) => {
+                const amount = parseInt(row.getValue("total"))
+                return <div className="text-left text-[#2366BC] text-[13px] font-inter">{formatCurrency({ amount: amount, currency: user.currency || "" })}</div>
+            },
+        },
+
+        {
+            accessorKey: "status",
+            header: "Status",
+            cell: ({ row }) => (
+                <Badge variant={row.getValue("status")}>{row.getValue("status")}</Badge>
+            ),
+        },
+        {
+            id: "actions",
+            enableHiding: false,
+            cell: ({ row }) => {
+                const payment = row.original
+
+                return (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem
+                                onClick={() => navigator.clipboard.writeText(payment.id.toString())}
+                            >
+                                Copy payment ID
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem>View customer</DropdownMenuItem>
+                            <DropdownMenuItem>View payment details</DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                )
+            },
+        },
+    ]
     const [columnVisibility, setColumnVisibility] =
         React.useState<VisibilityState>({})
     const [rowSelection, setRowSelection] = React.useState({})

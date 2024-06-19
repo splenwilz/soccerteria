@@ -18,17 +18,16 @@ import {
 } from "@/components/ui/card"
 import React from "react";
 import { SelectedOptions } from "@/components/Prediction";
-import { Edit, Loader, Loader2 } from "lucide-react";
+import { Edit, Loader, Loader2, SquareCheck } from "lucide-react";
 import { SelectSeparator } from "@/components/ui/select";
 import Image from "next/image";
-import walleticon from "../../../../assets/images/walleticon.svg";
-import { useMutation } from "@tanstack/react-query";
-import { createAddFundsSession, createPayForGameSession } from "../wallet/actions";
-import { useRouter } from "next/navigation";
-import { toast } from "@/components/ui/use-toast";
-import { User } from "@/lib/types";
+import walleticon from "../../../../../assets/images/walleticon.svg";
+import { Order, User } from "@/lib/types";
 import { loadStoredPredictionDataFromLocalStorage } from "@/lib/prediction_data";
-import { format } from "path";
+import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import { createPayForGameSession } from "../../wallet/actions";
+import { toast } from "@/components/ui/use-toast";
 import { formatCurrency } from "@/lib/format_currency";
 
 export interface PredictionData {
@@ -43,31 +42,19 @@ interface DataTableProps {
     currentRate: number
 }
 
-export default function DataTable({ user, balance, currentRate }: DataTableProps) {
-    const [predictionData, setPredictionData] = React.useState<PredictionData>({ selectedOptions: {}, totalAmount: 0, doublesCount: 0, triplesCount: 0 });
+interface DataTablePropsInterface {
+    currentRate: number;
+    order: Order;
+    predictionData: PredictionData;
+    user: User;
+}
 
+export default function DataTable({ currentRate, order, predictionData, user }: DataTablePropsInterface) {
     const [loading, setLoading] = React.useState(false)
-    React.useEffect(() => {
-        const storedPredictionData = loadStoredPredictionDataFromLocalStorage();
-        setPredictionData(storedPredictionData);
-    }, []);
-
-
-
 
     function onSubmit() {
-        // Check if user has the amount in their wallet larger than the total amount, if they do use that fund else proceed with payment checkout
-        const userBalance = parseFloat(balance);
-        const totalAmount = predictionData.totalAmount;
-        if (userBalance < totalAmount) {
-            toast({
-                title: 'Insufficient Funds',
-                description: 'Your wallet balance is insufficient to make this purchase. Please fund your wallet or try again later.',
-                variant: 'destructive',
-            })
-            return
-        }
-        addFunds({ price: Math.round(predictionData.totalAmount * currentRate * 100), gameOptions: predictionData, id: null })
+        console.warn(predictionData)
+        addFunds({ price: Math.round(predictionData.totalAmount * currentRate * 100), gameOptions: predictionData, id: order.id })
         setLoading(true)
     }
 
@@ -92,8 +79,6 @@ export default function DataTable({ user, balance, currentRate }: DataTableProps
             }
         }
     )
-
-
     return (
         <>
             <Card className="basis-2/3 ">
@@ -114,6 +99,7 @@ export default function DataTable({ user, balance, currentRate }: DataTableProps
                             </TableHeader>
                             <TableBody>
                                 {predictionData && predictionData.selectedOptions && Object.keys(predictionData.selectedOptions).map((key, index) => (
+
                                     <TableRow key={index}>
                                         <TableCell className="text-center py-4 font-inter text-[13px]">{index + 1}</TableCell>
                                         <TableCell className="py-4 text-[13px]">{key}</TableCell>
@@ -128,10 +114,6 @@ export default function DataTable({ user, balance, currentRate }: DataTableProps
                                         </TableCell>
                                     </TableRow>
                                 ))}
-
-
-
-
                             </TableBody>
                         </Table>
                     </div>
@@ -145,7 +127,7 @@ export default function DataTable({ user, balance, currentRate }: DataTableProps
 
                         <Image src={walleticon} alt="walleticon" width={20} height={20} />
                         <span className="text-[#212121] text-[13px]">Wallet:</span>
-                        <span className="text-[#2366BC] text-[13px]">{user?.currencySymbol || ''}{balance} </span>
+                        {/* <span className="text-[#2366BC] text-[13px]">{user?.currencySymbol || ''}{balance} </span> */}
 
                     </div>
                 </div>
@@ -170,28 +152,40 @@ export default function DataTable({ user, balance, currentRate }: DataTableProps
                             <SelectSeparator />
                             <div className="mt-5 flex justify-between mx-3 my-2">
                                 <p className="text-[#AFAFB4] text-[14px] font-inter">Total to pay</p>
-                                <div className="">
-                                    {/* <p className="text-[#212121] text-[15px] font-inter font-semibold">
-                                        {formatCurrency({ amount: predictionData.totalAmount, currency: user?.currency || '' })}
-                                    </p> */}
+                                <div className="flex gap-2">
+
                                     <p className="text-[#212121] text-[15px] font-inter font-semibold">
+                                        {/* {predictionData.totalAmount} EUR */}
                                         {formatCurrency({ amount: predictionData.totalAmount * currentRate, currency: user?.currency || '' })}
-                                        {/* {predictionData.totalAmount * currentRate} */}
+
                                     </p>
-                                    {/* <span className="text-[10px]">{predictionData.totalAmount} {user?.currency}  - {currentRate}EUR</span> */}
-                                </div>
+                                    <SquareCheck className="text-[#60c97e]" /></div>
                             </div>
                         </div>
 
+                        {/*
+                         ## TODO:
+                         1. If the date of the game is long past, throw an expiry date error to the user and disable submit.
+                         This will only happen if the game is an actual game with actual time                                    
+                        */}
+
                         <button
                             onClick={onSubmit}
-                            className={`bg-[#2366BC] ${loading ? "cursor-not-allowed bg-[#2366BC]/50" : ""} rounded-sm text-white font-inter font-semibold text-[16px] px-28 md:px-14 py-2 mt-10`}
-                            disabled={loading}
+                            className={`bg-[#2366BC] ${loading || order.status === 'complete' ? "cursor-not-allowed bg-[#2366BC]/50" : ""} rounded-sm text-white font-inter font-semibold text-[16px] px-28 md:px-14 py-2 mt-10`}
+                            disabled={loading || order.status === 'complete'}
                         >
-                            <div className={`flex gap-4 justify-center`}>
-                                <span className="">Finish my order</span>
-                                {loading && <Loader2 className='animate-spin w-5' />}
-                            </div>
+
+                            {order.status === 'complete'
+                                ?
+                                <span className="">Order Completed</span>
+                                :
+                                <div className={`flex gap-4 justify-center`}>
+                                    <span className="">Finish my order</span>
+                                    {loading && <Loader2 className='animate-spin w-5' />}
+                                </div>}
+
+
+
                         </button>
                     </div>
 

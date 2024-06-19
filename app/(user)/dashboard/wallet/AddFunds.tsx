@@ -21,11 +21,18 @@ import { createAddFundsSession } from './actions'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/ui/use-toast'
 import { Loader2 } from 'lucide-react'
+import { User } from '@/lib/types'
+import { Toast } from '@radix-ui/react-toast'
+import { Toaster } from '@/components/ui/toaster'
 
 const fundsSchema = z.object({
     amount: z.coerce.number(),
 })
-export default function AddFunds() {
+
+interface AddFundsProps {
+    user: User;
+}
+export default function AddFunds({ user }: AddFundsProps) {
     const form = useForm<z.infer<typeof fundsSchema>>({
         resolver: zodResolver(fundsSchema),
         defaultValues: {
@@ -57,6 +64,7 @@ export default function AddFunds() {
                 form.reset()
             },
             onError: (error) => {
+                setLoading(false)
                 toast({
                     title: 'Something went wrong',
                     description: error.message,
@@ -68,27 +76,34 @@ export default function AddFunds() {
 
     return (
         <div className='mt-10 shadow-md p-10 mx-10'>
+            <Toaster />
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                     <div className="w-1/2 mx-auto">
                         <FormField
                             control={form.control}
                             name="amount"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Add Funds (€)</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="0" type="number" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
+                            render={({ field }) => {
+                                const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                                    // console.log(e.target.value)
+                                    setLoading(false)
+                                    field.onChange(e)
+                                }
+                                return (
+                                    <FormItem>
+                                        <FormLabel>Add Funds ({user.currencySymbol})</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="0" type="number" {...field} onChange={handleChange} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )
+                            }}
                         />
                     </div>
 
                     <div className="flex justify-center mt-12 pt-12">
                         <Button variant={"primary"} type="submit" className='px-24 justify-between gap-5' disabled={loading}>
-
                             Add Funds  {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                         </Button>
                     </div>
