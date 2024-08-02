@@ -103,3 +103,83 @@ export function getMenuList(pathname: string): Group[] {
     }
   ];
 }
+
+export function getAdminMenuList(pathname: string): Group[] {
+  return [
+    {
+      groupLabel: "",
+      menus: [
+        {
+          href: "/admin",
+          label: "Home",
+          active: pathname.split("/").pop() === "admin",
+          icon: LayoutGrid,
+          submenus: []
+        },
+        {
+          href: "/admin/users",
+          label: "Users",
+          active: pathname.includes("/users"),
+          icon: Users,
+          submenus: []
+        },
+        {
+          href: "/admin/settings",
+          label: "Settings",
+          active: pathname.includes("/settings"),
+          icon: Settings,
+          submenus: []
+        },
+        {
+          href: "/admin/matchlist",
+          label: "Match List",
+          active: pathname.includes("/matchlist"),
+          icon: Bookmark,
+          submenus: []
+        },
+        {
+          href: "/admin/communications",
+          label: "Communications",
+          active: pathname.includes("/communications"),
+          icon: Megaphone,
+          submenus: []
+        },
+        {
+          href: "/admin/support",
+          label: "Support",
+          active: pathname.includes("/support"),
+          icon: Tag,
+          submenus: []
+        },
+        {
+          href: "/admin/combination",
+          label: "Combination",
+          active: pathname.includes("/combination"),
+          icon: Box,
+          submenus: []
+        },
+        {
+          href: "/admin/wallet",
+          label: "Wallet",
+          active: pathname.includes("/wallet"),
+          icon: Wallet,
+          submenus: []
+        },
+        {
+          href: "/admin/orders",
+          label: "Orders",
+          active: pathname.includes("/orders"),
+          icon: Notebook,
+          submenus: []
+        },
+        {
+          href: "/admin/draws",
+          label: "Draws",
+          active: pathname.includes("/draw"),
+          icon: LoaderPinwheelIcon,
+          submenus: []
+        }
+      ]
+    }
+  ];
+}

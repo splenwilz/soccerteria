@@ -1,4 +1,5 @@
 'use client'
+import { Match } from "@/app/(admin)/admin/matchlist/matchList";
 import {
     Table,
     TableBody,
@@ -6,6 +7,8 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import { capitalizeTitle } from "@/lib/capitalize";
+import { convertMatchListToPrediction } from "@/lib/convert_matchlist";
 import { loadStoredPredictionDataFromLocalStorage } from "@/lib/prediction_data";
 import { BoltIcon, XMarkIcon } from "@heroicons/react/16/solid"
 import { Loader2 } from "lucide-react";
@@ -15,24 +18,14 @@ import React, { useEffect, useState } from "react";
 export type SelectedOptions = { [key: string]: Option[] };
 
 type Option = '1' | 'X' | '2' | '0' | 'M';
-export default function Prediction() {
-    const demodata: string[][] = [
-        ['Borussia Dortmund', 'At Madrid'],
-        ['Rayo Vallecano', 'Getafe'],
-        ['Mallorca', 'Real Madrid'],
-        ['Las Palmas', 'Sevilla'],
-        ['Granada', 'Alavés'],
-        ['Athletic Club', 'Villarreal'],
-        ['Sporting', 'Cartagena'],
-        ['Andorra', 'Eibar'],
-        ['Braga', 'Paços de Ferreira'],
-        ['Sporting CP', 'Benfica'],
-        ['Tondela', 'Estoril'],
-        ['Maritimo', 'Belenenses'],
-        ['Nacional', 'Belenenses'],
-        ['Boavista', 'Santa Clara'],
-        ['Villarreal', 'Real Madrid'],
-    ]
+export interface PredictionProps {
+    matchList: Match[];
+    maxWidth?: boolean
+}
+
+export default function Prediction({ matchList, maxWidth }: PredictionProps) {
+
+    const newMatchList = convertMatchListToPrediction(matchList);
 
     const combinationAmounts: { [key: string]: number } = {
         '0-1': 2.25,
@@ -131,10 +124,12 @@ export default function Prediction() {
 
         '14-0': 12288.00,
     };
+
+
     const router = useRouter();
-
-
-    const [selectedOptions, setSelectedOptions] = useState<SelectedOptions>({});
+    const [selectedOptions, setSelectedOptions] = useState<SelectedOptions>({
+        'game15_home': ['1'],
+    });
     const [totalAmount, setTotalAmount] = useState(0);
     const [doublesCount, setDoublesCount] = useState(0);
     const [triplesCount, setTriplesCount] = useState(0);
@@ -142,9 +137,11 @@ export default function Prediction() {
     let selectedTeams = Object.keys(selectedOptions).length
 
 
-    React.useEffect(() => {
+
+
+    useEffect(() => {
         const storedPredictionData = loadStoredPredictionDataFromLocalStorage();
-        setSelectedOptions(storedPredictionData.selectedOptions);
+        storedPredictionData.selectedOptions ? setSelectedOptions(storedPredictionData.selectedOptions) : setSelectedOptions({});
     }, []);
 
 
@@ -228,7 +225,7 @@ export default function Prediction() {
         const game15_home = selectedOptions['game15_home'] || [];
         const game15_away = selectedOptions['game15_away'] || [];
 
-        const lastTeam = `${demodata[14][0]} - ${demodata[14][1]}`;
+        const lastTeam = `${newMatchList[14][0]} - ${newMatchList[14][1]}`;
         const lastTeamSelection = `${game15_home.join(',')} - ${game15_away.join(',')}`;
 
         // Remove game15_home and game15_away from selectedOptions and add lastTeamAndSelection
@@ -255,7 +252,8 @@ export default function Prediction() {
     const [loading, setLoading] = useState(false)
 
     return (
-        <div className="bg-[#F1F0FE] p-2 pl-3 pr-3 rounded-lg max-w-[700px] sm:max-w-[700px] md:max-w-[400px] xl:max-w-[700px]">
+        // max-w-[700px] sm:max-w-[700px] md:max-w-[400px] xl:max-w-[700px]
+        <div className={`bg-[#F1F0FE] p-2 pl-3 pr-3 rounded-lg  ${maxWidth ? 'w-full' : 'max-w-[400px] sm:max-w-[700px] md:max-w-[400px] xl:max-w-[700px]'}`}>
             <p className="text-center font-inter font-bold text-[16px] pb-2 pt-1 text-[#3A32A4]">Prediction</p>
             <Table className="bg-white rounded-lg">
                 <TableHeader>
@@ -278,22 +276,22 @@ export default function Prediction() {
                 </TableHeader>
                 <TableBody>
 
-                    {demodata.map((data, index) => {
+                    {newMatchList.map((data, index) => {
                         const teamId = data[0] + ' - ' + data[1];
-                        if (index === demodata.length - 1) {
+                        if (index === newMatchList.length - 1) {
                             // Split the last item into two rows for the 15th game
                             return (
                                 <React.Fragment key={index}>
-                                    <tr>
+                                    <TableRow>
                                         <td className="font-medium pl-4 text-[12px]" rowSpan={2}>15</td>
-                                        <td className="font-medium text-[12px] p-1">{teamId}</td>
+                                        <td className="font-medium text-[14x] p-1">{capitalizeTitle(teamId)}</td>
                                         <td className="p-1"><button onClick={() => handleOptionSelect(teamId, '0', true, 'home')} className={`rounded-full text-[12px] px-[14.5px] py-2 border border-[#00B660] ${selectedOptions['game15_home']?.includes('0') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>0</button></td>
                                         <td className="p-1"><button onClick={() => handleOptionSelect(teamId, '1', true, 'home')} className={`rounded-full text-[12px] px-[16px] py-2 border border-[#00B660] ${selectedOptions['game15_home']?.includes('1') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>1</button></td>
                                         <td className="p-1"><button onClick={() => handleOptionSelect(teamId, '2', true, 'home')} className={`rounded-full text-[12px] px-[14.5px] py-2 border border-[#00B660] ${selectedOptions['game15_home']?.includes('2') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>2</button></td>
                                         <td className="p-1"><button onClick={() => handleOptionSelect(teamId, 'M', true, 'home')} className={`rounded-full text-[12px] px-[12.5px] py-2 border border-[#00B660] ${selectedOptions['game15_home']?.includes('M') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>M</button></td>
-                                    </tr>
+                                    </TableRow>
                                     <tr>
-                                        <td className="font-medium text-[12px] p-1">{teamId}</td>
+                                        <td className="font-medium text-[14px] p-1">{capitalizeTitle(teamId)}</td>
                                         <td className="p-1"><button onClick={() => handleOptionSelect(teamId, '0', true, 'away')} className={`rounded-full text-[12px] px-[14.5px] py-2 border border-[#00B660] ${selectedOptions['game15_away']?.includes('0') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>0</button></td>
                                         <td className="p-1"><button onClick={() => handleOptionSelect(teamId, '1', true, 'away')} className={`rounded-full text-[12px] px-[16px] py-2 border border-[#00B660] ${selectedOptions['game15_away']?.includes('1') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>1</button></td>
                                         <td className="p-1"><button onClick={() => handleOptionSelect(teamId, '2', true, 'away')} className={`rounded-full text-[12px] px-[15px] py-2 border border-[#00B660] ${selectedOptions['game15_away']?.includes('2') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>2</button></td>
@@ -305,7 +303,7 @@ export default function Prediction() {
                             return (
                                 <tr key={index}>
                                     <td className="font-medium pl-4 py-1 text-[12px]">{index + 1}</td>
-                                    <td className="font-medium text-[12px] p-1">{teamId}</td>
+                                    <td className="font-medium text-[14px] p-1">{capitalizeTitle(teamId)}</td>
                                     <td className="p-1"><button onClick={() => handleOptionSelect(teamId, '1')} className={`rounded-full px-[16px] text-[12px] py-2 border border-[#00B660] ${selectedOptions[teamId]?.includes('1') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>1</button></td>
                                     <td className="p-1"><button onClick={() => handleOptionSelect(teamId, 'X')} className={`rounded-full px-[14.5px] text-[12px] py-2 border border-[#00B660] ${selectedOptions[teamId]?.includes('X') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>X</button></td>
                                     <td className="p-1"><button onClick={() => handleOptionSelect(teamId, '2')} className={`rounded-full px-[14.5px] text-[12px] py-2 border border-[#00B660] ${selectedOptions[teamId]?.includes('2') ? 'bg-[#00B660] text-[#FFFFFF]' : ''} font-semibold`}>2</button></td>
@@ -317,14 +315,14 @@ export default function Prediction() {
 
                 </TableBody>
             </Table>
-            <div className="flex mt-5 gap-4 w-96 mx-auto">
-                <button className="bg-[#CEFFE8] w-12 h-12 rounded-sm p-2 hover:bg-[#baeed6]">
+            <div className="flex mt-5 gap-2 m:gap-4 w-80 sm:w-96 mx-auto">
+                <button className="bg-[#CEFFE8] w-12 h-12 rounded-sm p-1 hover:bg-[#baeed6]">
                     <BoltIcon className="w-6 h-6 text-center ml-1" />
                 </button>
-                <button className="bg-[#FFFFFF99] w-32 h-12 rounded-sm p-2 hover:bg-[#FFFFFF71] font-semibold">
+                <button className="bg-[#FFFFFF99] w-32 h-12 rounded-sm px-1 p-2 hover:bg-[#FFFFFF71] font-semibold">
                     Double {doublesCount}
                 </button>
-                <button className="bg-[#FFFFFF99] w-32 h-12 rounded-sm p-2 font-semibold">
+                <button className="bg-[#FFFFFF99] w-32 h-12 rounded-sm p-2 px-1 font-semibold">
                     Triple {triplesCount}
                 </button>
                 <button
@@ -334,8 +332,8 @@ export default function Prediction() {
                     <XMarkIcon className="w-6 h-6 text-center ml-1 text-[#D6293A]" />
                 </button>
             </div>
-            <div className="mt-5 rounded-sm bg-white flex max-w-[580px] lg:w-[580px] pt-3 pb-3">
-                <div className="mx-auto flex flex-col lg:flex-row gap-3 lg:gap-10">
+            <div className="flex mt-5   w-auto ">
+                <div className="mx-auto rounded-sm  bg-white pt-3 pb-3 flex flex-col lg:flex-row gap-3 lg:gap-10 w-[580px] justify-center items-center">
                     <div className="flex gap-10">
                         <div className="flex flex-col">
                             <p className="text-[12px] font-inter">Bet</p>
@@ -347,11 +345,14 @@ export default function Prediction() {
                         </div>
                         <div className="">
                             <p className="text-[12px] font-inter">Draw Date</p>
-                            <p className="text-[15px] font-inter text-[#154583] font-medium">21/04/2024</p>
+                            <p className="text-[15px] font-inter text-[#154583] font-medium">
+                                {matchList?.[0]?.gameDate ? new Date(matchList[0].gameDate).toLocaleDateString() : ''}
+                            </p>
+
                         </div>
                     </div>
                     <button
-                        onClick={handleGameSubmit}
+                        onClick={() => { handleGameSubmit(); setLoading(true); }}
                         className="bg-[#2366BC] disabled:bg-[#2366BC]/50 disabled:cursor-not-allowed text-white font-inter font-semibold text-[16px] px-7 py-2 rounded-sm"
                         disabled={selectedTeams < 16}
                     >
@@ -360,7 +361,6 @@ export default function Prediction() {
                                 Play Now
                             </span>
                             {loading && <Loader2 className="animate-spin w-4" />}
-
                         </div>
                     </button>
                 </div>

@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/popover"
 import { XMarkIcon } from "@heroicons/react/16/solid";
 import { cn } from "@/lib/utils";
-import { UserButton } from "@clerk/nextjs";
+import { SignedOut, UserButton } from "@clerk/nextjs";
 
 interface NavigationProps {
     clasName?: string
@@ -49,9 +49,13 @@ export default function Navigation(props: NavigationProps) {
                     <div className="border-0 bg-[#E7E7E7] w-[1px] mt-[2px] h-[18px] "></div>
                 </ul>
                 <ShoppingCart className={`${props.logo === 'logo1' ? 'text-white' : 'text-black'} mx-10 w-4 relative z-50`} />
-                <button className="-mt-1 text-white cursor-pointer bg-[#2366BC] text-[13px] font-inter pt-2 pb-2 pr-6 pl-6 rounded-sm mr-20 relative z-50">
-                    <Link href={'/sign-in'}>Login</Link>
-                </button>
+
+                <SignedOut>
+                    <button className="-mt-1 text-white cursor-pointer bg-[#2366BC] text-[13px] font-inter pt-2 pb-2 pr-6 pl-6 rounded-sm mr-20 relative z-50">
+                        <Link href={'/sign-in'}>Login</Link>
+                    </button>
+                </SignedOut>
+                <div className="ml-20"></div>
                 <UserButton />
             </div>
             <div className="block lg:hidden">

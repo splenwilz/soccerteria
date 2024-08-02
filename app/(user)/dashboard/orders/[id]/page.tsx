@@ -10,7 +10,7 @@ import React from "react";
 import { ContentLayout } from "@/components/admin-panel/content-layout";
 import DataTable from "./DataTable";
 import { currentUser } from "@clerk/nextjs/server";
-import { getOrderById, getUser } from "@/lib/user";
+import { getOrderById, getUser, getUserBalance } from "@/lib/user";
 import { convertCurrency } from "@/lib/convert_currency";
 import { formatOrderId } from "@/lib/format_id";
 
@@ -26,6 +26,10 @@ export default async function Page({ params }: { params: { id: string } }) {
     const user = await currentUser();
     const userFromDB = await getUser(user!.id);
     const currentRate = await convertCurrency(1, 'EUR', userFromDB[0].currency || 'USD');
+
+    const userBalance = await getUserBalance(user!.id);
+    const firstUserBalance = userBalance[0] || {};
+    const balance = firstUserBalance.balance || '0';
 
     return (
         <ContentLayout title="Dashboard">
@@ -48,7 +52,7 @@ export default async function Page({ params }: { params: { id: string } }) {
                     </Breadcrumb>
                 </div>
                 <div className="flex gap-4 mt-10">
-                    <DataTable user={userFromDB[0]} currentRate={currentRate} order={order} predictionData={order.gameOptions || { selectedOptions: {}, doublesCount: 0, totalAmount: 0, triplesCount: 0 }} />
+                    <DataTable user={userFromDB[0]} balance={balance} currentRate={currentRate} order={order} predictionData={order.gameOptions || { selectedOptions: {}, doublesCount: 0, totalAmount: 0, triplesCount: 0 }} />
                 </div>
             </div>
         </ContentLayout>

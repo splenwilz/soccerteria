@@ -26,7 +26,7 @@ import { Order, User } from "@/lib/types";
 import { loadStoredPredictionDataFromLocalStorage } from "@/lib/prediction_data";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
-import { createPayForGameSession } from "../../wallet/actions";
+import { createOrUpdateOrder, createPayForGameSession } from "../../wallet/actions";
 import { toast } from "@/components/ui/use-toast";
 import { formatCurrency } from "@/lib/format_currency";
 
@@ -47,15 +47,73 @@ interface DataTablePropsInterface {
     order: Order;
     predictionData: PredictionData;
     user: User;
+    balance: string,
 }
 
-export default function DataTable({ currentRate, order, predictionData, user }: DataTablePropsInterface) {
+export default function DataTable({ currentRate, order, predictionData, user, balance }: DataTablePropsInterface) {
     const [loading, setLoading] = React.useState(false)
 
-    function onSubmit() {
-        console.warn(predictionData)
-        addFunds({ price: Math.round(predictionData.totalAmount * currentRate * 100), gameOptions: predictionData, id: order.id })
-        setLoading(true)
+    // function onSubmit() {
+    //     console.warn(predictionData)
+    //     addFunds({ price: Math.round(predictionData.totalAmount * currentRate * 100), gameOptions: predictionData, id: order.id })
+    //     setLoading(true)
+    // }
+
+    // const router = useRouter()
+    // const { mutate: addFunds } = useMutation(
+    //     {
+    //         mutationKey: ['addFunds'],
+    //         mutationFn: createPayForGameSession,
+    //         onSuccess: ({ url }) => {
+    //             if (url) {
+    //                 router.push(url)
+    //             } else {
+    //                 throw new Error('Unable to retrieve payment url')
+    //             }
+    //         },
+    //         onError: (error) => {
+    //             toast({
+    //                 title: 'Something went wrong',
+    //                 description: error.message,
+    //                 variant: 'destructive',
+    //             })
+    //         }
+    //     }
+    // )
+
+
+    async function onSubmit() {
+        setLoading(true);
+        try {
+
+            const userBalance = parseFloat(balance);
+            const totalAmount = predictionData.totalAmount * currentRate;
+
+            if (userBalance < totalAmount) {
+
+                addFunds({ price: Math.round(predictionData.totalAmount * currentRate * 100), gameOptions: predictionData, id: order.id })
+
+            } else {
+                const newBalance = (userBalance - totalAmount).toFixed(2);
+                addFundsFromBalance({
+                    price: Math.round(predictionData.totalAmount * currentRate * 100),
+                    gameOptions: predictionData,
+                    id: order.id,
+                    newBalance,
+                    userId: user.userId
+                });
+            }
+        } catch (error) {
+            console.error("Error in onSubmit:", error);
+            toast({
+                title: 'Something went wrong',
+                description: (error as Error).message,
+                variant: 'destructive',
+            });
+        } finally {
+            setLoading(false);
+        }
+        setLoading(false);
     }
 
     const router = useRouter()
@@ -79,6 +137,28 @@ export default function DataTable({ currentRate, order, predictionData, user }: 
             }
         }
     )
+
+    const { mutate: addFundsFromBalance } = useMutation({
+        mutationKey: ['addFundsFromBalance'],
+        mutationFn: createOrUpdateOrder,
+        onSuccess: ({ url }) => {
+            if (url) {
+                router.push(url)
+            } else {
+                throw new Error('Unable to retrieve payment url')
+            }
+        },
+        onError: (error) => {
+            toast({
+                title: 'Something went wrong',
+                description: error.message,
+                variant: 'destructive',
+            })
+        }
+    })
+
+
+
     return (
         <>
             <Card className="basis-2/3 ">
@@ -127,7 +207,9 @@ export default function DataTable({ currentRate, order, predictionData, user }: 
 
                         <Image src={walleticon} alt="walleticon" width={20} height={20} />
                         <span className="text-[#212121] text-[13px]">Wallet:</span>
-                        {/* <span className="text-[#2366BC] text-[13px]">{user?.currencySymbol || ''}{balance} </span> */}
+                        <span className="text-[#2366BC] text-[13px]">
+                            {formatCurrency({ amount: parseInt(balance || '0'), currency: user.currency || '' })}
+                        </span>
 
                     </div>
                 </div>
@@ -170,7 +252,8 @@ export default function DataTable({ currentRate, order, predictionData, user }: 
                         */}
 
                         <button
-                            onClick={onSubmit}
+                            // onClick={onSubmit}
+                            onClick={() => { onSubmit(); console.log("clicked"); setLoading(true) }}
                             className={`bg-[#2366BC] ${loading || order.status === 'complete' ? "cursor-not-allowed bg-[#2366BC]/50" : ""} rounded-sm text-white font-inter font-semibold text-[16px] px-28 md:px-14 py-2 mt-10`}
                             disabled={loading || order.status === 'complete'}
                         >

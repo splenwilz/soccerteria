@@ -14,6 +14,8 @@ import Image from "next/image"
 import realmadrid from '../assets/images/realmadrid.png'
 import { useEffect, useState } from "react"
 import whirl from '../assets/images/whirl.png'
+import LeagueTableStanding, { LeagueTableStandingProps } from "./LeagueTableStanding"
+import { capitalizeTitle } from "@/lib/capitalize"
 
 export interface LeagueTableProps {
     records: Array<{
@@ -28,8 +30,7 @@ export interface LeagueTableProps {
     }>;
 }
 
-
-export default function LeagueTable() {
+export default function LeagueTable({ standings, standings2 }: LeagueTableStandingProps) {
     // Create a demodata for spanish league table
     const demoData = {
         records: [
@@ -116,7 +117,7 @@ export default function LeagueTable() {
 
         ],
     }
-    const [leagueTable, setLeagueTable] = useState<LeagueTableProps>(demoData)
+    // const [leagueTable, setLeagueTable] = useState<LeagueTableProps>(demoData)
 
     // Array for Category and Prizes
     const prizesDistributed = [
@@ -136,7 +137,49 @@ export default function LeagueTable() {
             <div className="flex flex-col md:flex-row gap-1 mt-0 md:mt-8 bg-[#FEEDDB] max-w-[708px] rounded-md">
                 <div className="p-2 pl-3 pr-3 rounded-lg max-w-[470px]">
                     <p className="text-center font-inter font-bold text-[16px] pb-2 pt-1 text-[#3A32A4]">FIRST DIVISION</p>
-                    <Table className="bg-white rounded-lg">
+                    <div className="h-[400px] overflow-y-auto  max-w-[330px]">
+                        <Table className="bg-white rounded-lg  ">
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="p-1 pl-4 px-4">#</TableHead>
+                                    <TableHead className="p-1 px-4" >Team</TableHead>
+                                    <TableHead className="p-1 px-4">GP</TableHead>
+                                    <TableHead className="p-1 px-4">W</TableHead>
+                                    <TableHead className="p-1 px-4">D</TableHead>
+                                    <TableHead className="p-1 px-4">L</TableHead>
+                                    {/* <TableHead className="p-1 px-4">F</TableHead>
+                                    <TableHead className="p-1 px-4">A</TableHead>
+                                    <TableHead className="p-1 px-4">GD</TableHead>
+                                    <TableHead className="p-1 px-4">P</TableHead> */}
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {standings && standings.slice(0, 7).map((record, index) => (
+                                    <TableRow key={index + 1}>
+                                        <TableCell className="font-medium pl-4 text-[12px]">{index + 1}</TableCell>
+                                        <TableCell className="font-medium text-[12px] p-1 px-1" >
+                                            <div className="flex gap-1 relative w-full">
+                                                <Image src={record.team.logos[0].href} width={20} height={12} alt={record.team.displayName} className="absolute mt-1 " />
+                                                <p className="mt-1 ml-6">{capitalizeTitle(record.team.displayName)}</p>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="font-medium text-[12px] p-1 ">
+                                            {record.stats[0].value}
+                                        </TableCell>
+                                        <TableCell className="font-medium text-[12px] p-1">{record.stats[7].value}</TableCell>
+                                        <TableCell className="font-medium text-[12px] p-1">{record.stats[6].value}</TableCell>
+                                        <TableCell className="font-medium text-[12px] p-1">{record.stats[1].value}</TableCell>
+                                        {/* <TableCell className="font-medium text-[12px] p-1">{record.stats[5].value}</TableCell>
+                                        <TableCell className="font-medium text-[12px] p-1">{record.stats[4].value}</TableCell>
+                                        <TableCell className="font-medium text-[12px] p-1">{record.stats[2].value}</TableCell>
+                                        <TableCell className="font-medium text-[12px] p-1">{record.stats[3].value}</TableCell> */}
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+
+                    {/* <Table className="bg-white rounded-lg">
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="p-1 pl-4">#</TableHead>
@@ -154,9 +197,11 @@ export default function LeagueTable() {
                             {leagueTable.records.map((record, index) => (
                                 <TableRow key={index + 1}>
                                     <TableCell className="font-medium pl-4 text-[12px]">{index + 1}</TableCell>
-                                    <TableCell className="font-medium text-[12px] p-1 flex">
-                                        <Image src={realmadrid} width={20} height={12} alt="" className="mr-1" />
-                                        <p className="mt-1">{record.team}</p>
+                                    <TableCell className="font-medium text-[12px] p-1">
+                                        <div className="flex gap-1 relative w-full">
+                                            <Image src={realmadrid} width={20} height={12} alt="" className="absolute mt-1 " />
+                                            <p className="mt-1 ml-6">{record.team}</p>
+                                        </div>
                                     </TableCell>
                                     <TableCell className="font-medium text-[12px] p-1">{record.played}</TableCell>
                                     <TableCell className="font-medium text-[12px] p-1">{record.win}</TableCell>
@@ -170,12 +215,12 @@ export default function LeagueTable() {
 
 
                         </TableBody>
-                    </Table>
+                    </Table> */}
                 </div>
 
-                <div className=" p-2 pl-3 pr-3 rounded-lg max-w-[470px]">
+                <div className=" p-2 pr-3 rounded-lg max-w-[470px]">
                     <p className="text-center font-inter font-bold text-[16px] pb-2 pt-1 text-[#3A32A4]">SECOND DIVISION</p>
-                    <Table className="bg-white rounded-lg">
+                    {/* <Table className="bg-white rounded-lg">
                         <TableHeader>
                             <TableRow>
                                 <TableHead className="p-1 pl-4">#</TableHead>
@@ -193,9 +238,13 @@ export default function LeagueTable() {
                             {leagueTable.records.map((record, index) => (
                                 <TableRow key={index + 1}>
                                     <TableCell className="font-medium pl-4 text-[12px]">{index + 1}</TableCell>
-                                    <TableCell className="font-medium text-[12px] p-1 flex">
-                                        <Image src={realmadrid} width={20} height={12} alt="" className="mr-1" />
-                                        <p className="mt-1">{record.team}</p>
+                                    <TableCell className="font-medium text-[12px] p-1">
+                                        
+
+                                        <div className="flex gap-1 relative w-full">
+                                            <Image src={realmadrid} width={20} height={12} alt="" className="absolute mt-1 " />
+                                            <p className="mt-1 ml-6">{record.team}</p>
+                                        </div>
                                     </TableCell>
                                     <TableCell className="font-medium text-[12px] p-1">{record.played}</TableCell>
                                     <TableCell className="font-medium text-[12px] p-1">{record.win}</TableCell>
@@ -209,10 +258,52 @@ export default function LeagueTable() {
 
 
                         </TableBody>
-                    </Table>
+                    </Table> */}
+                    <div className="h-[400px] overflow-y-auto  max-w-[330px]">
+                        <Table className="bg-white rounded-lg ">
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="p-1 pl-4 px-4">#</TableHead>
+                                    <TableHead className="p-1 px-4" >Team</TableHead>
+                                    <TableHead className="p-1 px-4">GP</TableHead>
+                                    <TableHead className="p-1 px-4">W</TableHead>
+                                    <TableHead className="p-1 px-4">D</TableHead>
+                                    <TableHead className="p-1 px-4">L</TableHead>
+                                    {/* <TableHead className="p-1 px-4">F</TableHead>
+                                    <TableHead className="p-1 px-4">A</TableHead>
+                                    <TableHead className="p-1 px-4">GD</TableHead>
+                                    <TableHead className="p-1 px-4">P</TableHead> */}
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {standings2 && standings2.slice(0, 7).map((record, index) => (
+                                    <TableRow key={index + 1}>
+                                        <TableCell className="font-medium pl-4 text-[12px] px-4">{index + 1}</TableCell>
+                                        <TableCell className="font-medium text-[12px] p-1 px-1" >
+                                            <div className="flex gap-1 relative w-full">
+                                                <Image src={record.team.logos[0].href} width={20} height={12} alt={record.team.displayName} className="absolute mt-1 " />
+                                                <p className="mt-1 ml-6">{capitalizeTitle(record.team.displayName)}</p>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="font-medium text-[12px] p-1 px-4">
+                                            {record.stats[0].value}
+                                        </TableCell>
+                                        <TableCell className="font-medium text-[12px] p-1 px-4">{record.stats[7].value}</TableCell>
+                                        <TableCell className="font-medium text-[12px] p-1 px-4">{record.stats[6].value}</TableCell>
+                                        <TableCell className="font-medium text-[12px] p-1 px-4">{record.stats[1].value}</TableCell>
+                                        {/* <TableCell className="font-medium text-[12px] p-1 px-4">{record.stats[5].value}</TableCell>
+                                        <TableCell className="font-medium text-[12px] p-1 px-4">{record.stats[4].value}</TableCell>
+                                        <TableCell className="font-medium text-[12px] p-1 px-4">{record.stats[2].value}</TableCell>
+                                        <TableCell className="font-medium text-[12px] p-1 px-4">{record.stats[3].value}</TableCell> */}
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
                 </div>
 
             </div>
+            {/* <LeagueTableStanding leagueTable={leagueTable} horizontal={false} /> */}
             <div className="prize_destribution mt-10 lg:-mt-20">
                 <div className=" p-2 pl-3 pr-3 rounded-lg max-w-[400px] bg-[#E3F0FF]">
                     <p className="text-center font-inter font-bold text-[16px] pb-2 pt-1 text-[#0B3F7C]">PRIZES DISTRIBUTED</p>

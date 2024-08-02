@@ -3,3 +3,16 @@ GET https://v6.exchangerate-api.com/v6/268220a9659ced5866b9a27c/pair/EUR/NGN
 GET https://api.ipgeolocation.io/ipgeo?apiKey=5d848db7493f4a6b9e9163e6ff466478
 ###
 GET https://sound-poetic-cattle.ngrok-free.app/api/webhooks/clerk
+
+###
+GET https://prod-public-api.livescore.com/v1/api/app/stage/soccer/spain/laliga/1?countryCode=NG&locale=en&MD=1
+
+###
+GET https://site.web.api.espn.com/apis/v2/sports/soccer/esp.1/standings?region=in&lang=en&contentorigin=espn&season=2023&sort=rank:asc
+
+###
+GET https://site.web.api.espn.com/apis/v2/sports/soccer/esp.2/standings?region=in&lang=en&contentorigin=espn&season=2023&sort=rank:asc
+
+
+###
+GET https://prod-public-api.livescore.com/v1/api/app/date/soccer/20240628/1?countryCode=NG&locale=en&MD=1

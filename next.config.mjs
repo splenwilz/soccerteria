@@ -23,6 +23,12 @@ const nextConfig = {
       {
         hostname: "utfs.io",
       },
+      {
+        protocol: "https",
+        hostname: "a.espncdn.com",
+        port: "",
+        pathname: "/i/teamlogos/soccer/500/**",
+      },
     ],
   },
 };

@@ -1,9 +1,9 @@
-import { Order, User } from "./types"
+import { League, Order, User } from "./types"
 import { db } from "../utils/dbConfig"
-import { GameOrdersSchema, UserSchema, WalletOrdersSchema, WalletSchema } from "../utils/schema"
-import { eq } from "drizzle-orm"
-import { SelectedOptions } from "@/components/Prediction"
+import { GameOrdersSchema, MatchListSchema, UserSchema, WalletOrdersSchema, WalletSchema } from "../utils/schema"
+import { desc, eq } from "drizzle-orm"
 import { PredictionData } from "@/app/(user)/dashboard/summary/DataTable"
+import { matchListFormValues } from "@/app/(admin)/admin/matchlist/matchList"
 export const createUser = async (userdata: User) => {
     // db.delete(user)
     const userresult = await db
@@ -193,3 +193,113 @@ export const deleteOrder = async (orderId: string) => {
 
     return order;
 };
+
+
+export const useUserBalance = async (userId: string, newBalance: string) => {
+    const updateWalletBalance = await db
+        .update(WalletSchema)
+        .set({ balance: newBalance })
+        .where(eq(WalletSchema.userId, userId))
+        .returning({ balance: WalletSchema.balance });
+    return updateWalletBalance;
+};
+
+
+
+export const CreateOrUpdateOrder = async (user: User, orderId: string | null, total: number, gameOptions: PredictionData) => {
+    let order;
+    if (orderId) {
+        // Update existing order
+        order = await db
+            .update(GameOrdersSchema)
+            .set({
+                total: total.toString(),
+                status: "complete",
+                gameOptions: gameOptions,
+                updatedAt: new Date(),
+            })
+            .where(eq(GameOrdersSchema.id, orderId))
+            .returning({
+                id: GameOrdersSchema.id,
+                total: GameOrdersSchema.total,
+            });
+
+    } else {
+        // Create new order
+        order = await db
+            .insert(GameOrdersSchema)
+            .values({
+                userId: user.userId,
+                status: "complete",
+                total: total.toString(),
+                gameOptions: gameOptions,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            })
+            .returning({
+                id: GameOrdersSchema.id,
+                total: GameOrdersSchema.total,
+            });
+    }
+}
+
+
+
+// Insert Match List
+// export const insertMatchList = async (data: matchListFormValues) => {
+//     const insertMatchList = await db
+//         .insert(MatchListSchema)
+//         .values(data)
+//         .returning({
+//             id: MatchListSchema.id
+//         });
+//     return insertMatchList
+// }
+
+
+export const insertMatchList = async (data: matchListFormValues) => {
+    // Convert gameDate to ISO string format
+    const formattedData = {
+        ...data,
+        gameDate: data.gameDate.toISOString(),
+        jackpot: data.jackpot.toString() ?? '0'
+    };
+    const insertMatchList = await db
+        .insert(MatchListSchema)
+        .values(formattedData)
+        .returning({
+            id: MatchListSchema.id,
+        });
+
+    return insertMatchList;
+};
+
+// Get the last item from match list
+export const getMatchList = async () => {
+    const matchList = await db
+        .select()
+        .from(MatchListSchema)
+        .orderBy(desc(MatchListSchema.createdAt))
+        .limit(1)
+        .execute();
+    return matchList;
+}
+
+// Fetch Data from this API https://site.web.api.espn.com/apis/v2/sports/soccer/esp.1/standings?region=in&lang=en&contentorigin=espn&season=2023&sort=rank:asc
+export async function fetchLaLigaStandings({ division }: { division: 'first' | 'second' }): Promise<League | null> {
+    const url = `https://site.web.api.espn.com/apis/v2/sports/soccer/${division === 'first' ? 'esp.1' : 'esp.2'}/standings?region=in&lang=en&contentorigin=espn&season=2023&sort=rank:asc`;
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            // throw new Error(`HTTP error! Status: ${response.status}`);
+            console.error(`HTTP error! Status: ${response.status}`);
+        }
+        const data: League = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching the LaLiga standings:', error);
+        // throw error;
+        return null
+    }
+}

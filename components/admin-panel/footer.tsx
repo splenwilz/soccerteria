@@ -5,7 +5,7 @@ import Image from "next/image";
 export function Footer() {
   return (
     <div className="z-20 w-full bg-background/95 shadow backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-4 md:mx-8 flex h-14 items-center justify-between">
+      <div className="mx-4 md:mx-8 flex py-[22px] flex-col gap-2 md:gap-0 md:flex-row h-full items-center justify-between">
         <div className="flex gap-2">
           <Image src={age_limit} alt="age_limit" width={25} height={25} />
           <p className="text-xs md:text-sm leading-loose text-muted-foreground text-left mt-[2px]">
@@ -36,7 +36,6 @@ export function Footer() {
         <p className="text-[12px] leading-loose text-muted-foreground text-left">
           Made with love by the Soccerteria team. All rights reserved.
         </p>
-
       </div>
     </div>
   );

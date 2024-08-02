@@ -8,9 +8,8 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { BoltIcon, XMarkIcon } from "@heroicons/react/16/solid"
 
-export default function Livescore() {
+export default function Livescore({ maxHeight }: { maxHeight?: boolean }) {
     const demodata = [
         ['Borussia Dortmund', 'At Madrid'],
         ['Rayo Vallecano', 'Getafe'],
@@ -31,13 +30,13 @@ export default function Livescore() {
 
 
     return (
-        <div className="bg-[#E134340F] p-2 pl-3 pr-3 rounded-xl max-w-[700px] max-h-[880px]">
+        <div className={`bg-[#E134340F] p-2 pl-3 pr-3 rounded-xl max-w-[700px]  ${maxHeight ? 'max-h-auto' : 'max-h-[825px]'}`}>
             <p className="text-center font-inter font-bold text-[16px] pb-2 pt-1 text-[#E13434]">Live Score</p>
             <Table className="bg-white rounded-lg">
                 <TableHeader>
                     <TableRow>
                         <TableHead className="bg-[#F9FAFB]">#</TableHead>
-                        <TableHead colSpan={4} className="bg-[#F9FAFB] text-[14px] font-inter">ROUND: 52 (17/04/24)</TableHead>
+                        <TableHead colSpan={4} className="bg-[#F9FAFB] text-[12px] font-inter">ROUND: 52 (17/04/24)</TableHead>
                         <TableHead colSpan={5} className="bg-[#F9FAFB] text-[14px] font-inter">
                             Last update 13:00:35
                         </TableHead>

@@ -13,7 +13,7 @@ import {
   TooltipContent,
   TooltipProvider
 } from "@/components/ui/tooltip";
-import { getMenuList } from "@/lib/menu-list";
+import { getAdminMenuList, getMenuList } from "@/lib/menu-list";
 import { SignOutButton } from "@clerk/nextjs";
 
 interface MenuProps {
@@ -22,7 +22,7 @@ interface MenuProps {
 
 export function Menu({ isOpen }: MenuProps) {
   const pathname = usePathname();
-  const menuList = getMenuList(pathname);
+  const menuList = pathname.includes("/admin") ? getAdminMenuList(pathname) : getMenuList(pathname);
 
   return (
     <ScrollArea className="[&>div>div[style]]:!block">

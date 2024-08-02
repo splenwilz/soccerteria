@@ -4,7 +4,7 @@ import { SelectedOptions } from "@/components/Prediction"
 import { stripe } from "@/lib/stripe"
 import { getUser } from "@/lib/user"
 import { db } from "@/utils/dbConfig"
-import { GameOrdersSchema, WalletOrdersSchema } from "@/utils/schema"
+import { GameOrdersSchema, WalletOrdersSchema, WalletSchema } from "@/utils/schema"
 // import { OrdersSchema } from "@/utils/schema"
 import { currentUser } from "@clerk/nextjs/server"
 import { PredictionData } from "../summary/DataTable"
@@ -178,3 +178,137 @@ export const createPayForGameSession = async ({ price, gameOptions, id }: { pric
 
     return { url: stripeSession.url }
 }
+
+// export const createOrUpdateOrder = async ({ price, gameOptions, id, newBalance, userId }: { price: number, gameOptions: PredictionData, id: string | null, newBalance: string, userId: string }) => {
+//     const user = await currentUser();
+//     const useFromDB = await getUser(user!.id);
+//     let order;
+//     if (id) {
+//         order = await db
+//             .update(GameOrdersSchema)
+//             .set({
+//                 total: (price / 100).toString(),
+//                 gameOptions: gameOptions,
+//                 updatedAt: new Date(),
+//             })
+//             .where(eq(GameOrdersSchema.id, id))
+//             .returning({
+//                 id: GameOrdersSchema.id,
+//                 total: GameOrdersSchema.total,
+
+//             });
+//     } else {
+//         order = await db
+//             .insert(GameOrdersSchema)
+//             .values({
+//                 userId: user!.id,
+//                 status: "pending",
+//                 total: (price / 100).toString(),
+//                 gameOptions: gameOptions,
+//                 createdAt: new Date(),
+//                 updatedAt: new Date(),
+//             })
+//             .returning({
+//                 id: GameOrdersSchema.id,
+//                 total: GameOrdersSchema.total,
+//             });
+//     }
+//     const url = `${process.env.NEXT_PUBLIC_DOMAIN}/dashboard/summary?orderId=${order[0].id}`
+
+//     // If the order is created successfully, update the user's wallet balance
+//     if (order) {
+//         const updateWalletBalance = await db
+//             .update(WalletSchema)
+//             .set({ balance: newBalance })
+//             .where(eq(WalletSchema.userId, userId))
+//             .returning({ balance: WalletSchema.balance });
+//         return updateWalletBalance;
+//     }
+//     return { url };
+// }
+
+export const createOrUpdateOrder = async ({
+    price,
+    gameOptions,
+    id,
+    newBalance,
+    userId
+}: {
+    price: number;
+    gameOptions: PredictionData;
+    id: string | null;
+    newBalance: string;
+    userId: string;
+}) => {
+    let order;
+    try {
+        const user = await currentUser();
+        if (!user) {
+            throw new Error("User not authenticated");
+        }
+
+        const userFromDB = await getUser(user.id);
+        if (!userFromDB) {
+            throw new Error("User not found in the database");
+        }
+
+        if (id) {
+            order = await db
+                .update(GameOrdersSchema)
+                .set({
+                    total: (price / 100).toString(),
+                    gameOptions,
+                    status: "complete",
+                    updatedAt: new Date(),
+                })
+                .where(eq(GameOrdersSchema.id, id))
+                .returning({
+                    id: GameOrdersSchema.id,
+                    total: GameOrdersSchema.total,
+                });
+        } else {
+            order = await db
+                .insert(GameOrdersSchema)
+                .values({
+                    userId: user.id,
+                    status: "complete",
+                    total: (price / 100).toString(),
+                    gameOptions,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                })
+                .returning({
+                    id: GameOrdersSchema.id,
+                    total: GameOrdersSchema.total,
+                });
+        }
+
+        const orderId = order[0]?.id;
+        const url = `${process.env.NEXT_PUBLIC_DOMAIN}/dashboard?orderId=${orderId}`;
+
+        // If the order is created/updated successfully, update the user's wallet balance
+        if (orderId) {
+            try {
+                const updateWalletBalance = await db
+                    .update(WalletSchema)
+                    .set({ balance: newBalance })
+                    .where(eq(WalletSchema.userId, userId))
+                    .returning({ balance: WalletSchema.balance });
+
+                return { url };
+            } catch (walletError) {
+                // Rollback the order creation if wallet update fails
+                if (!id) {
+                    await db.delete(GameOrdersSchema).where(eq(GameOrdersSchema.id, orderId));
+                }
+                console.error("Error updating wallet balance:", walletError);
+                throw new Error("Unable to update wallet balance");
+            }
+        }
+
+        throw new Error("Order creation/update failed");
+    } catch (error) {
+        console.error("Error in createOrUpdateOrder:", error);
+        throw new Error("Unable to create or update order");
+    }
+};

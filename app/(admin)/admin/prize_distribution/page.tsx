@@ -4,21 +4,22 @@ import {
     CardContent,
 } from "@/components/ui/card"
 import { currentUser } from "@clerk/nextjs/server";
-import { getUser } from "@/lib/user";
+import { getMatchList, getUser } from "@/lib/user";
 import dynamic from "next/dynamic";
 
 // Dynamically import CalendarForm
-const ProfileForm = dynamic(() => import("./Profile"));
+const CalendarForm = dynamic(() => import("./matchList"));
 
-export default async function ProfilePage() {
+export default async function Content() {
     const userId = await currentUser()
     const user = await getUser(userId?.id!)
     const [profileUser] = user
+    const matchList = await getMatchList()
     return (
-        <ContentLayout title="Profile">
+        <ContentLayout title="Add Match List">
             <Card>
                 <CardContent>
-                    <ProfileForm user={profileUser} />
+                    <CalendarForm user={profileUser} matchList={matchList} />
                 </CardContent>
             </Card>
         </ContentLayout>
