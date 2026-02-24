@@ -51,7 +51,7 @@ export const matchListFormSchema = z.object({
     team15home: z.string().min(1, { message: "Home team for match 15 is required." }),
     team15away: z.string().min(1, { message: "Away team for match 15 is required." }),
     gameDate: z.date({
-        required_error: "Game date is required.",
+        error: "Game date is required.",
     }),
     jackpot: z.string()
         .min(1, { message: "Jackpot must be at least 1." })

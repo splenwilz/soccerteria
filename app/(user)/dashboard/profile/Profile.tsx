@@ -126,7 +126,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
                             />
 
                             <button
-                                className={`border h-9 py-1 ${uploading ? 'opacity-50 cursor-not-allowed' : ''} rounded-sm border-[#2366BC] text-[#2366BC] bg-[#fff] px-8 text-[12px]`}
+                                className={`border h-9 py-1 ${uploading ? 'opacity-50 cursor-not-allowed' : ''} rounded-sm border-[#2366BC] text-[#2366BC] bg-white px-8 text-[12px]`}
                                 onClick={handleRemoveImage}
                             >
                                 <div className="flex gap-3">

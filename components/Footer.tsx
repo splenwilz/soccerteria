@@ -6,7 +6,7 @@ import { MapPin, Phone } from "lucide-react"
 import LanguageSelector from "./LanguageSelector"
 export default function Footer() {
     return (
-        <div className="bg-gradient-to-b from-[#1B2A58] to-[#202430] w-full h-full md:h-[350px] mt-32">
+        <div className="bg-linear-to-b from-[#1B2A58] to-[#202430] w-full h-full md:h-[350px] mt-32">
             <Image src={footer_bg} alt="Footer Background" className="w-full absolute z-0" />
             <div className="relative flex flex-col md:flex-row gap-16 justify-center items-center md:justify-between mx-auto max-w-[1200px]">
                 <div className="flex flex-col justify-center items-center">

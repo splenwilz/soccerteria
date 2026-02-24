@@ -47,7 +47,7 @@ export interface User {
 // export type Order = {
 //     id: number;
 //     userId: string | null;
-//     status: "pending" | "complete" | "cancel" | "default" | "secondary" | "destructive" | "outline" | null;
+//     status: "pending" | "complete" | "cancel" | "default" | "secondary" | "destructive" | "outline-solid" | null;
 //     total: string | null;
 //     createdAt: Date | null;
 //     updatedAt: Date | null;
@@ -55,7 +55,7 @@ export interface User {
 export interface Order {
     id: string;
     userId: string | null;
-    status: "pending" | "complete" | "cancel" | "default" | "secondary" | "destructive" | "outline" | null;
+    status: "pending" | "complete" | "cancel" | "default" | "secondary" | "destructive" | "outline-solid" | null;
     total: string | null;
     gameOptions?: PredictionData;
     checkoutLink?: string | null;

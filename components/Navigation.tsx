@@ -21,7 +21,7 @@ interface NavigationProps {
 
 export default function Navigation(props: NavigationProps) {
     return (
-        <nav className={cn(`bg-[rgba(0,0,0,0.92)] flex flex-row justify-between p-8 pb-5 border  ${props.logo === 'logo1' ? 'border-[#8a8a8a]' : 'border-[#BAE1FF]'} border-t-0 border-l-0 border-r-0 border-b-[1px] w-full`, props.clasName)}>
+        <nav className={cn(`bg-[rgba(0,0,0,0.92)] flex flex-row justify-between p-8 pb-5 border  ${props.logo === 'logo1' ? 'border-[#8a8a8a]' : 'border-[#BAE1FF]'} border-t-0 border-l-0 border-r-0 border-b w-full`, props.clasName)}>
             <div className="logo_container ml-0 lg:ml-10 relative z-40">
                 <Image src={props.logo === 'logo1' ? logo1 : logo2} alt="Soccerteria Logo" width={120} height={50} />
             </div>
@@ -30,23 +30,23 @@ export default function Navigation(props: NavigationProps) {
                     <li >
                         <Link href="/">Home</Link>
                     </li>
-                    <div className="border-0 bg-[#E7E7E7] w-[1px] mt-[2px] h-[18px] "></div>
+                    <div className="border-0 bg-[#E7E7E7] w-px mt-[2px] h-[18px] "></div>
                     <li >
                         <Link href="/results">Results</Link>
                     </li>
-                    <div className="border-0 bg-[#E7E7E7] w-[1px] mt-[2px] h-[18px] "></div>
+                    <div className="border-0 bg-[#E7E7E7] w-px mt-[2px] h-[18px] "></div>
                     <li >
                         <Link href="/shop">Shop</Link>
                     </li>
-                    <div className="border-0 bg-[#E7E7E7] w-[1px] mt-[2px] h-[18px] "></div>
+                    <div className="border-0 bg-[#E7E7E7] w-px mt-[2px] h-[18px] "></div>
                     <li >
                         <Link href="/help">Info & Help</Link>
                     </li>
-                    <div className="border-0 bg-[#E7E7E7] w-[1px] mt-[2px] h-[18px] "></div>
+                    <div className="border-0 bg-[#E7E7E7] w-px mt-[2px] h-[18px] "></div>
                     <li >
                         <Link href="/my-account">My Account</Link>
                     </li>
-                    <div className="border-0 bg-[#E7E7E7] w-[1px] mt-[2px] h-[18px] "></div>
+                    <div className="border-0 bg-[#E7E7E7] w-px mt-[2px] h-[18px] "></div>
                 </ul>
                 <ShoppingCart className={`${props.logo === 'logo1' ? 'text-white' : 'text-black'} mx-10 w-4 relative z-50`} />
 

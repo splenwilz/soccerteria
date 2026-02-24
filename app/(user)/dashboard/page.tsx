@@ -115,7 +115,7 @@ export default async function DashboardPage() {
                                     <ArrowRight className="h-4 w-4 text-muted-foreground" />
                                 </Link>
                             </CardHeader>
-                            <div className="mx-5 h-[1px] bg-[#EAEAEA] opacity-65 my-2"></div>
+                            <div className="mx-5 h-px bg-[#EAEAEA] opacity-65 my-2"></div>
                             <CardContent>
                                 <div className="flex mt-5">
                                     <div className="basis-1/2 flex justify-between flex-col">
@@ -130,7 +130,7 @@ export default async function DashboardPage() {
                                         </button>
 
                                     </div>
-                                    <div className="mx-5 w-[1px] h-[190px] bg-[#2366BC80] opacity-65 my-2"></div>
+                                    <div className="mx-5 w-px h-[190px] bg-[#2366BC80] opacity-65 my-2"></div>
                                     <div className="basis-1/2 flex justify-between flex-col">
                                         <div className="">
 
@@ -159,7 +159,7 @@ export default async function DashboardPage() {
                                     <ArrowRight className="h-4 w-4 text-muted-foreground" />
                                 </Link>
                             </CardHeader>
-                            <div className="mx-5 h-[1px] bg-[#EAEAEA] opacity-65 my-2"></div>
+                            <div className="mx-5 h-px bg-[#EAEAEA] opacity-65 my-2"></div>
 
                             <CardContent>
                                 <div className="mt-5">
@@ -174,7 +174,7 @@ export default async function DashboardPage() {
                                                     <span className="h-4 w-1"></span>
                                                     {/* Order should look like this XPL 80668 DB */}
                                                     <Link href={`dashboard/orders/${order.id}`} className="font-inter text-[#000000] font-semibold text-[12px] mr-2 underline uppercase">{formatOrderId(order.id)}</Link>
-                                                    <Badge variant={order.status || 'destructive'} className="-mt-[2px] ">{order.status}</Badge>
+                                                    <Badge variant={(order.status || 'destructive') as "default" | "destructive" | "outline" | "secondary" | "pending" | "complete" | "cancel"} className="-mt-[2px] ">{order.status}</Badge>
                                                 </div>
                                             </div>
                                         </div>
@@ -212,7 +212,7 @@ export default async function DashboardPage() {
                                 </Link>
 
                             </CardHeader>
-                            <div className="mx-5 h-[1px] bg-[#EAEAEA] opacity-65 my-2"></div>
+                            <div className="mx-5 h-px bg-[#EAEAEA] opacity-65 my-2"></div>
 
                             <CardContent>
                                 <div className="flex mt-5">
@@ -228,7 +228,7 @@ export default async function DashboardPage() {
 
 
                                     </div>
-                                    <div className="mx-5 w-[1px] h-[190px] bg-[#2366BC80] opacity-65 my-2"></div>
+                                    <div className="mx-5 w-px h-[190px] bg-[#2366BC80] opacity-65 my-2"></div>
                                     <div className="basis-1/2 flex justify-between flex-col">
                                         <div className="">
 
@@ -261,7 +261,7 @@ export default async function DashboardPage() {
                                 </Link>
 
                             </CardHeader>
-                            <div className="mx-5 h-[1px] bg-[#EAEAEA] opacity-65 my-2"></div>
+                            <div className="mx-5 h-px bg-[#EAEAEA] opacity-65 my-2"></div>
 
                             <CardContent>
                                 <div className="flex mt-5">
@@ -278,7 +278,7 @@ export default async function DashboardPage() {
 
 
                                     </div>
-                                    <div className="mx-5 w-[1px] h-[190px] bg-[#2366BC80] opacity-65 my-2"></div>
+                                    <div className="mx-5 w-px h-[190px] bg-[#2366BC80] opacity-65 my-2"></div>
                                     <div className="basis-1/2 flex justify-between flex-col">
                                         <div className="">
 
@@ -308,7 +308,7 @@ export default async function DashboardPage() {
                                 </div>
 
                             </CardHeader>
-                            <div className="mx-5 h-[1px] bg-[#EAEAEA] opacity-65 my-2"></div>
+                            <div className="mx-5 h-px bg-[#EAEAEA] opacity-65 my-2"></div>
 
                             <CardContent>
                                 <div className="flex mt-5 justify-between flex-col">
@@ -350,7 +350,7 @@ export default async function DashboardPage() {
                                 </Link>
 
                             </CardHeader>
-                            <div className="mx-5 h-[1px] bg-[#EAEAEA] opacity-65 my-2"></div>
+                            <div className="mx-5 h-px bg-[#EAEAEA] opacity-65 my-2"></div>
 
                             <CardContent>
                                 <div className="flex mt-5 justify-between flex-col">
@@ -387,7 +387,7 @@ export default async function DashboardPage() {
                                 </Link>
 
                             </CardHeader>
-                            <div className="mx-5 h-[1px] bg-[#EAEAEA] opacity-65 my-2"></div>
+                            <div className="mx-5 h-px bg-[#EAEAEA] opacity-65 my-2"></div>
 
                             <CardContent>
                                 <div className="flex mt-5 justify-between flex-col">

@@ -72,7 +72,7 @@ const CommentaryDropdown: React.FC<CommentaryDropdownProps> = ({
         <button
           aria-label="Show timeline details"
           type="button"
-          className={`inline-flex issearching font-lexend justify-between w-56 border shadow-sm p-2 pl-3 pr-3 bg-white text-[15px] focus:outline-none ${buttonClass}`}
+          className={`inline-flex issearching font-lexend justify-between w-56 border shadow-xs p-2 pl-3 pr-3 bg-white text-[15px] focus:outline-hidden ${buttonClass}`}
           onClick={() => {
             setIsOpen(!isOpen)
             if (!isOpen && timelineDropDown) {
@@ -91,7 +91,7 @@ const CommentaryDropdown: React.FC<CommentaryDropdownProps> = ({
       </div>
       {isOpen && (
         <div
-          className={`commentaryoption origin-top-right absolute z-50 sm:right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 focus:outline-none ${dropdownContainerClass}`}
+          className={`commentaryoption origin-top-right absolute z-50 sm:right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 focus:outline-hidden ${dropdownContainerClass}`}
         >
           <div className="py-1 max-h-80 overflow-y-auto" role="none">
             {options.map((option) => (

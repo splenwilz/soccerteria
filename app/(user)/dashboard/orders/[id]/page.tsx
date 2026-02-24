@@ -14,8 +14,9 @@ import { getOrderById, getUser, getUserBalance } from "@/lib/user";
 import { convertCurrency } from "@/lib/convert_currency";
 import { formatOrderId } from "@/lib/format_id";
 
-export default async function Page({ params }: { params: { id: string } }) {
-    const order = await getOrderById(params.id);
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    const order = await getOrderById(id);
     if (!order) {
         return (
             <div className="flex items-center justify-center h-screen">

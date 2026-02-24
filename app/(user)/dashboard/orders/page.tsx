@@ -145,7 +145,7 @@ export default async function OrdersPage() {
                                                         {formatCurrency({ amount: parseInt(order.total || '0'), currency: userFromDb[0].currency || '' })}
                                                     </TableCell>
                                                     <TableCell className="text-center py-4">
-                                                        <Badge variant={order.status}>{order.status}</Badge>
+                                                        <Badge variant={order.status as "default" | "destructive" | "outline" | "secondary" | "pending" | "complete" | "cancel" | null | undefined}>{order.status}</Badge>
                                                     </TableCell>
                                                     <TableCell className="py-4 text-center">
                                                         {order.createdAt

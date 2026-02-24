@@ -4,7 +4,7 @@ import Image from "next/image";
 
 export function Footer() {
   return (
-    <div className="z-20 w-full bg-background/95 shadow backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div className="z-20 w-full bg-background/95 shadow-sm backdrop-blur-sm supports-backdrop-filter:bg-background/60">
       <div className="mx-4 md:mx-8 flex py-[22px] flex-col gap-2 md:gap-0 md:flex-row h-full items-center justify-between">
         <div className="flex gap-2">
           <Image src={age_limit} alt="age_limit" width={25} height={25} />

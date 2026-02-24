@@ -28,7 +28,7 @@ export const UserSchema = pgTable("users", {
 export const OrdersSchema = pgTable("orders", {
   id: serial("id").primaryKey(),
   userId: text("userId").references(() => UserSchema.userId, { onDelete: 'cascade' }),
-  status: text("status").$type<"pending" | "complete" | "cancel" | "default" | "secondary" | "destructive" | "outline">(),
+  status: text("status").$type<"pending" | "complete" | "cancel" | "default" | "secondary" | "destructive" | "outline-solid">(),
   total: text("total"),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").defaultNow(),
@@ -38,7 +38,7 @@ export const OrdersSchema = pgTable("orders", {
 export const WalletOrdersSchema = pgTable("wallet_orders", {
   id: text('id').$defaultFn(() => createId()).primaryKey(),
   userId: text("userId").references(() => UserSchema.userId, { onDelete: 'cascade' }),
-  status: text("status").$type<"pending" | "complete" | "cancel" | "default" | "secondary" | "destructive" | "outline">(),
+  status: text("status").$type<"pending" | "complete" | "cancel" | "default" | "secondary" | "destructive" | "outline-solid">(),
   total: text("total"),
   checkoutLink: text("checkoutLink"),
   createdAt: timestamp("createdAt").defaultNow(),
@@ -49,7 +49,7 @@ export const WalletOrdersSchema = pgTable("wallet_orders", {
 export const GameOrdersSchema = pgTable("game_orders", {
   id: text('id').$defaultFn(() => createId()).primaryKey(),
   userId: text("userId").references(() => UserSchema.userId, { onDelete: 'cascade' }),
-  status: text("status").$type<"pending" | "complete" | "cancel" | "default" | "secondary" | "destructive" | "outline">(),
+  status: text("status").$type<"pending" | "complete" | "cancel" | "default" | "secondary" | "destructive" | "outline-solid">(),
   total: text("total"),
   gameOptions: json("gameOptions").default({}),
   createdAt: timestamp("createdAt").defaultNow(),

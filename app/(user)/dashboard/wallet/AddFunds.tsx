@@ -29,12 +29,14 @@ const fundsSchema = z.object({
     amount: z.coerce.number(),
 })
 
+type FundsFormValues = z.output<typeof fundsSchema>
+
 interface AddFundsProps {
     user: User;
 }
 export default function AddFunds({ user }: AddFundsProps) {
-    const form = useForm<z.infer<typeof fundsSchema>>({
-        resolver: zodResolver(fundsSchema),
+    const form = useForm<FundsFormValues>({
+        resolver: zodResolver(fundsSchema) as any,
         defaultValues: {
             amount: 0,
         },

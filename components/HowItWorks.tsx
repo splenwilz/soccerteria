@@ -12,16 +12,16 @@ export default function HowItWorks() {
                 <div className="bg-[#2366BC] w-[50px] rounded-full h-[50px] ">
                     <p className="mx-5 pt-2 text-white font-manrope text-[23px] font-semibold">1</p>
                 </div>
-                <div className="w-[1px] ml-6 bg-[#2366BC] h-[200px] "></div>
+                <div className="w-px ml-6 bg-[#2366BC] h-[200px] "></div>
 
                 <div className="bg-[#ECECEC] w-[50px] rounded-full h-[50px]">
                     <p className="mx-5 pt-2 text-[#121212] font-manrope text-[23px] font-semibold">2</p>
                 </div>
-                <div className="w-[1px] ml-6 bg-[#ECECEC] h-[180px] "></div>
+                <div className="w-px ml-6 bg-[#ECECEC] h-[180px] "></div>
                 <div className="bg-[#ECECEC] w-[50px] rounded-full h-[50px]">
                     <p className="mx-5 pt-2 text-[#121212] font-manrope text-[23px] font-semibold">3</p>
                 </div>
-                <div className="w-[1px] ml-6 bg-[#ECECEC] h-[195px] "></div>
+                <div className="w-px ml-6 bg-[#ECECEC] h-[195px] "></div>
                 <div className="bg-[#ECECEC] w-[50px] rounded-full h-[50px] ">
                     <p className="mx-5 pt-2 text-[#121212] font-manrope text-[23px] font-semibold">4</p>
                 </div>

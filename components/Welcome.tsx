@@ -27,7 +27,7 @@ export default function Welcome({ time, jackpot }: { time: string, jackpot: stri
                     <div className="mt-1">
                         <span className="text-[#3180E5] font-inter font-semibold text-[30px]">€</span>
                         <span className=" font-inter text-[52px] font-extrabold text-white">{formattedJackpotValue}</span>
-                        <span className="text-[#3180E5] font-inter font-semibold text-[30px] ml-[1px]">Million</span>
+                        <span className="text-[#3180E5] font-inter font-semibold text-[30px] ml-px">Million</span>
                     </div>
                     <p className="text-white text-center md:text-left mt-2 leading-6 md:leading-8 mx-5 md:mx-0 max-w-[480px] font-inter text-[14px] md:text-[16px]">
                         Welcome to the ultimate lottery experience!

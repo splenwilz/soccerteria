@@ -51,7 +51,7 @@ const UpcomingCountTime: React.FC<UpcomingCountTimeProps> = ({ time, jackpot }) 
 
     return (
         <div className="mx-auto">
-            <div className="mx-auto pb-4 relative rounded-md sm:rounded-2xl w-[100%] h-auto bg-[#BAE1FF29] mt-10 border border-[#7ABFF4]">
+            <div className="mx-auto pb-4 relative rounded-md sm:rounded-2xl w-full h-auto bg-[#BAE1FF29] mt-10 border border-[#7ABFF4]">
                 <Image src={golfball1} alt="Golfball" className='absolute' width={40} height={40} />
                 <Image src={golfball2} alt="Golfball" className='absolute top-16 left-10' width={30} height={30} />
                 <Image src={golfball3} alt="Golfball" className='absolute right-20' width={40} height={40} />

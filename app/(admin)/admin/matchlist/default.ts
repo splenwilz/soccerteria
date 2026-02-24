@@ -18,12 +18,10 @@ export const profileFormSchema = z.object({
         .max(30, {
             message: "Lastname must not be longer than 30 characters.",
         }),
-    language: z
-        .string()
-        .refine((value) => value === "en", "Please select an option").optional(),
+    language: z.enum(["en"], { error: "Please select an option" }).optional(),
     email: z
         .string({
-            required_error: "Please select an email to display.",
+            error: "Please select an email to display.",
         })
         .email(),
     gender: z.enum(["male", "female"]).refine((value) => value !== undefined, {
@@ -72,7 +70,7 @@ export const matchListFormSchema = z.object({
     team15home: z.string().min(1, { message: "Home team for match 15 is required." }),
     team15away: z.string().min(1, { message: "Away team for match 15 is required." }),
     gameDate: z.date({
-        required_error: "Game date is required.",
+        error: "Game date is required.",
     }),
     jackpot: z.string()
         .min(1, { message: "Jackpot must be at least 1." })
